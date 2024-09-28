@@ -27,6 +27,6 @@ with open('agent.log', 'a') as log:
         match = (secret[i] == userinput[i]) and match
         
     if match:
-        print("correct")
+        print("correct answer")
     else:
         print("wrong answer")
