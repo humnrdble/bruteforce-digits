@@ -13,7 +13,6 @@ userinput = input()
 userinput = userinput.replace("\"", "\'").replace("\n","").replace("\r","")
 
 with open('agent.log', 'a') as log:
-    #when reading log: for counting lines, remove newline!
     log.write('"'+ userinput + '"' + "\n")
 
     if len(userinput) != 4 or notnumbers(userinput):

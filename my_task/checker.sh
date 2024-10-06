@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo -u simon /home/simon/checkerpy.sh
+sudo -u root /root/checkerpy.sh
