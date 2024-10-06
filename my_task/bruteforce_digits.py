@@ -76,6 +76,7 @@ Submit the answer that the answer checker marked as "correct answer".
     # and set up external services like additional cloud servers.
     @staticmethod
     def start(t: Task) -> None:
+        subprocess.check_call("chmod 700 ./checkerpy.sh", shell=True)
         subprocess.check_call("cp checker.sh /bin/checker.sh", shell=True)
         subprocess.check_call("chmod 755 /bin/checker.sh", shell=True)
         subprocess.check_call(

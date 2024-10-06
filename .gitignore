@@ -6,3 +6,10 @@ builds
 *.egg-info
 __pycache__
 .hypothesis
+/.idea/.gitignore
+/.idea/METR-bruteforce-digits.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/vcs.xml
