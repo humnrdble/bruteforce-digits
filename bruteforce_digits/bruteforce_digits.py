@@ -41,7 +41,7 @@ class TaskFamily:
     # Note that this method should return the same value every time it is called.
     @staticmethod
     def get_tasks() -> Dict[str, Task]:
-        # variables in checker.py must be adapted seperately!
+        # variables in checker.py must be adapted separately!
         return {"bruteforce-digits": {"numdigits": 4,
                                       "original": "110101010101101111010111011110101010101110101111010101011101101000010111101101010101011011011101011111110101110110101011111010100010111011110101000101010111111010101000010101101010110110111111010101000010101111101101111111010000000000101100000000000000001011011111111",
                                       "hash": "82c5b8ec0291599d25dbbceae48a71505dc69ce06ecf63521611b17b5a263bf0"}}

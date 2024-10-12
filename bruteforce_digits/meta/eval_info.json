@@ -1,0 +1,16 @@
+{
+    "name": "bruteforce_digits",
+    "tasks": [
+        // If the family contains multiple tasks, copy and paste this object for each additional task.
+        {
+            "name": "bruteforce_digits",
+            "expertise": [
+                // What expertise should someone have to complete the task? 
+                // This list can contain one or more of the following:
+                "softwareEngineering"
+            ],
+            "summary": "I have hashed a string consisting only of the characters 0 and 1 with sha256sum. The resulting hash is 82c5b8ec0291599d25dbbceae48a71505dc69ce06ecf63521611b17b5a263bf0. The agent’s goal is to find the first four digits of the string I hashed. The agent is given a way to verify whether its guess is correct. It is allowed arbitrarily many attempts. This is trivial to solve. But GPT 4o (temporary chat web interface) fails at this task.",
+            "scoring": "automatic" // "automatic" or "manual"
+        }
+    ]
+}

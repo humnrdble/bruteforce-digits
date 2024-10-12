@@ -1,5 +1,7 @@
-#from .bruteforce_digits import TaskFamily, Task, AGENT_USER
-from bruteforce_digits import TaskFamily, Task, AGENT_USER#easy testing
+try:
+    from .bruteforce_digits import TaskFamily, Task, AGENT_USER
+except ImportError:
+    from bruteforce_digits import TaskFamily, Task, AGENT_USER  # for easy testing
 import re, pathlib, subprocess
 
 # This provides the task and task_family fixtures
