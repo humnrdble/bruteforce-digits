@@ -12,7 +12,7 @@ print("Check your answer:")
 userinput = input()
 userinput = userinput.replace("\"", "\'").replace("\n","").replace("\r","")
 
-with open('agent.log', 'a') as log:
+with open('/root/agent.log', 'a') as log:
     log.write('"'+ userinput + '"' + "\n")
 
     if len(userinput) != 4 or notnumbers(userinput):

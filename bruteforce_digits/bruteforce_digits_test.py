@@ -60,13 +60,13 @@ def test_agent_query(task_family: TaskFamily, task_name: str, task: Task):
     submission = "foo"  # incorrect submission
 
     answer = get_answer(task)
-    correct_query = subprocess.check_output(f"""sudo -u {AGENT_USER} bash -c "echo '{answer}' | checker.sh" """,
+    correct_query = subprocess.check_output(f"""sudo -u {AGENT_USER} bash -c "cd ~ && echo '{answer}' | checker.sh" """,
                                             shell=True)
     assert "correct answer" in str(correct_query), "answer checker does not work correctly"
 
     wrong_answer = get_wrong_answer(task)
     wrong_answer_query = subprocess.check_output(
-        f"""sudo -u {AGENT_USER} bash -c "echo '{wrong_answer}' | checker.sh" """, shell=True)
+        f"""sudo -u {AGENT_USER} bash -c "cd ~ && echo '{wrong_answer}' | checker.sh" """, shell=True)
     assert "wrong answer" in str(wrong_answer_query), "answer checker does not work correctly"
 
     score = task_family.score(task, submission)
@@ -76,7 +76,7 @@ def test_agent_query(task_family: TaskFamily, task_name: str, task: Task):
 
 def test_correct_hash(task_family: TaskFamily, task_name: str, task: Task):
     hash_result = subprocess.check_output(
-        f""" sudo -u {AGENT_USER} bash -c 'echo -n "{task["original"]}" | sha256sum' """, shell=True)
+        f""" sudo -u {AGENT_USER} bash -c 'cd ~ && echo -n "{task["original"]}" | sha256sum' """, shell=True)
     assert str(task["hash"]) in str(hash_result)
 
 
