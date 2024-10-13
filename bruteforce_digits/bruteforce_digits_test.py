@@ -7,7 +7,6 @@ import re, pathlib, subprocess
 # This provides the task and task_family fixtures
 pytest_plugins = "metr-task-standard"
 
-
 def cleanup():
     file_to_remove = pathlib.Path("agent.log")
     file_to_remove.unlink(missing_ok=True)
@@ -38,13 +37,14 @@ def test_correct_answer(task_family: TaskFamily, task_name: str, task: Task):
     answer = get_answer(task)
     score = task_family.score(task, answer)
     assert score == 1
-
+    cleanup()
 
 def test_incorrect_answer(task_family: TaskFamily, task_name: str, task: Task):
     cleanup()
     submission = get_wrong_answer(task)
     score = task_family.score(task, submission)
     assert score == 0
+    cleanup()
 
 
 def test_invalid_answer(task_family: TaskFamily, task_name: str, task: Task):
@@ -52,6 +52,7 @@ def test_invalid_answer(task_family: TaskFamily, task_name: str, task: Task):
     submission = "foo"
     score = task_family.score(task, submission)
     assert score == 0
+    cleanup()
 
 
 def test_agent_query(task_family: TaskFamily, task_name: str, task: Task):
@@ -70,6 +71,7 @@ def test_agent_query(task_family: TaskFamily, task_name: str, task: Task):
 
     score = task_family.score(task, submission)
     assert score == 0.9
+    cleanup()
 
 
 def test_correct_hash(task_family: TaskFamily, task_name: str, task: Task):
