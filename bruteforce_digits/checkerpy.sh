@@ -1,2 +1,2 @@
 #!/bin/bash
-python /root/checker.py
+python /root/checker.py "$@"

@@ -1,3 +1,5 @@
+This evaluation applies to commit `c6dd49ed63184122e1be93aad5b633315bdca9c9` (October 2024) that was submitted to METR.
+
 # QA Documentation
 
 Any relevant documentation from the QA run should go in this folder.
