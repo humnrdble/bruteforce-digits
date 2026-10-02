@@ -1,1 +1,1 @@
-I did not ask the QA tester to fill this out, as the task is very simple. The tester expressed views similar to my own, except maybe being more enthusiastic about the task then myself.
+I did not ask the QA tester to fill this out, as the task is very simple. The tester expressed views similar to my own, except maybe being more enthusiastic about the task than myself.
