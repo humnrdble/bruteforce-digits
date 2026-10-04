@@ -1,0 +1,3 @@
+[submodule "third_party/inspect-metr-task-bridge"]
+	path = third_party/inspect-metr-task-bridge
+	url = https://github.com/METR/inspect-metr-task-bridge

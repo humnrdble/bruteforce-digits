@@ -1,0 +1,8 @@
+version: 0.1.0
+meta:
+  name: Bruteforce digits
+tasks:
+  bruteforce_digits:
+    resources:
+      cpus: 1
+      memory_gb: 1
