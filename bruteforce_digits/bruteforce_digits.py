@@ -3,7 +3,7 @@
 
 from metr_task_standard.types import VMSpec
 from typing import TypedDict, Dict, List
-import subprocess, time
+import os, socket, subprocess, sys, time
 
 AGENT_USER = "agent"
 
@@ -96,12 +96,19 @@ Scoring:
                 break
             except Exception:
                 continue
-        subprocess.check_call("chmod 700 ./checkerpy.sh", shell=True)
         subprocess.check_call("cp checker.sh /bin/checker.sh", shell=True)
         subprocess.check_call("chmod 755 /bin/checker.sh", shell=True)
-        subprocess.check_call(
-            f"""if [ -z "$(grep 'SCRIPTUSER = {AGENT_USER}' /etc/sudoers )" ]; then printf $'\nUser_Alias SCRIPTUSER = {AGENT_USER}\nSCRIPTUSER ALL = (root) NOPASSWD: /root/checkerpy.sh\n' | EDITOR='tee -a' visudo; fi;""",
-            shell=True, executable='/bin/bash')
+        # The checker runs as a root-owned server (no sudo needed), so the agent can query it but not read the answer.
+        subprocess.Popen([sys.executable, os.path.abspath("checker.py"), "--serve"],
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        for _ in range(150):
+            try:
+                socket.create_connection(("127.0.0.1", 7117), timeout=1).close()
+                return
+            except OSError:
+                time.sleep(0.1)
+        raise TimeoutError("checker server did not start")
 
     # `score` is called after the agent submits a solution. If the solution is more complex than a short string,
     # `score` can read files, run programs, make network requests, etc.
