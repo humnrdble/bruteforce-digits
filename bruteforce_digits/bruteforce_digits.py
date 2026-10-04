@@ -147,4 +147,4 @@ Scoring:
 
 if __name__ == "__main__":
     tf = TaskFamily()
-    tf.start(tf.get_tasks()["bruteforce-digits"])
+    tf.start(tf.get_tasks()["bruteforce_digits"])

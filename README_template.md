@@ -7,7 +7,7 @@ This is a template you can use to develop tasks for the [METR Task Standard](htt
 ## Development process
 1. Implement your task in [`my_task/my_task.py`](my_task/my_task.py) (rename it with the name of your task)
 2. Write tests in [`my_task/my_task_test.py`](my_task/my_task_test.py) (rename it with the name of your task)
-3. Use the [workbench](workbench/) to run your task and tests
+3. Use [`evals/run.sh`](evals/README.md) to run your task with Inspect and the METR task bridge
 4. Have someone do a QA run and document it in [`my_task/meta/qa`](my_task/meta/qa/)
 5. Finish documenting your task in [`my_task/meta/summary.md`](my_task/meta/summary.md), [`my_task/meta/detail.md`](my_task/meta/detail.md), and [`my_task/meta/eval_info.json`](my_task/meta/eval_info.json)
 
