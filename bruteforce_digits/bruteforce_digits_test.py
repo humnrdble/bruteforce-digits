@@ -3,6 +3,7 @@ try:
 except ImportError:
     from bruteforce_digits import TaskFamily, Task, AGENT_USER  # for easy testing
 import re, pathlib, subprocess, time
+import pytest
 
 # This provides the task and task_family fixtures
 pytest_plugins = "metr-task-standard"
@@ -62,22 +63,22 @@ def test_timing_scoring(task_family: TaskFamily, task_name: str, task: Task):
     # Immediate completion (0s): score = 1.0
     with open("start_time", "w") as f:
         f.write(str(now))
-    assert task_family.score(task, answer) == 1.0
+    assert task_family.score(task, answer) == pytest.approx(1.0, abs=1e-3)
 
     # 300s elapsed (halfway through 600s baseline): score = 0.75
     with open("start_time", "w") as f:
         f.write(str(now - 300))
-    assert task_family.score(task, answer) == 0.75
+    assert task_family.score(task, answer) == pytest.approx(0.75, abs=1e-3)
 
     # 600s elapsed (benchmark reached): score = 0.5 (floor)
     with open("start_time", "w") as f:
         f.write(str(now - 600))
-    assert task_family.score(task, answer) == 0.5
+    assert task_family.score(task, answer) == pytest.approx(0.5, abs=1e-3)
 
     # 1200s elapsed (> benchmark): score = 0.5 (floor preserved)
     with open("start_time", "w") as f:
         f.write(str(now - 1200))
-    assert task_family.score(task, answer) == 0.5
+    assert task_family.score(task, answer) == pytest.approx(0.5, abs=1e-3)
 
     # Wrong answer always receives 0.0 even if submitted immediately
     with open("start_time", "w") as f:

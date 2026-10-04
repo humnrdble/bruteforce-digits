@@ -141,7 +141,7 @@ Scoring:
 
     # Optional: `teardown` cleans up any external resources created during setup.
     @staticmethod
-    def teardown(t: Task) -> None:
+    def teardown(t: Task | None = None) -> None:  # the bridge calls teardown() without arguments
         pass
 
 
