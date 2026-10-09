@@ -33,5 +33,5 @@ uv --project "$BRIDGE" run inspect eval mtb/bridge \
     --sample-id "$TASK_DIR" \
     --model "$MODEL" \
     --epochs "$EPOCHS" \
-    --time-limit "${TIME_LIMIT:-600}" \
+    --working-limit "${WORKING_LIMIT:-600}" \
     --log-dir evals/logs

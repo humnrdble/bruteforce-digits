@@ -17,6 +17,6 @@ and runs `inspect eval mtb/bridge`. Logs go to `evals/logs/`; view them with
 `uv --project third_party/inspect-metr-task-bridge run inspect view --log-dir evals/logs`.
 
 `MODEL=mockllm/model` runs the pipeline without a real model (only useful to check that the task starts).
-Other knobs: `EPOCHS` (repeats), `TIME_LIMIT` (seconds, default 600), `REGISTRY`.
+Other knobs: `EPOCHS` (repeats), `WORKING_LIMIT` (working seconds, default 600), `REGISTRY`.
 
 Each time `bruteforce_digits/manifest.yaml`'s `version` changes, a new image tag is built.

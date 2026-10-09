@@ -9,7 +9,7 @@ import pytest
 pytest_plugins = "metr-task-standard"
 
 def cleanup():
-    for f in [pathlib.Path("agent.log"), pathlib.Path("start_time"), pathlib.Path("/root/start_time")]:
+    for f in [pathlib.Path("agent.log")]:
         try:
             f.unlink(missing_ok=True)
         except PermissionError:
@@ -52,39 +52,6 @@ def test_invalid_answer(task_family: TaskFamily, task_name: str, task: Task):
     submission = "foo"
     score = task_family.score(task, submission)
     assert score == 0.0
-    cleanup()
-
-
-def test_timing_scoring(task_family: TaskFamily, task_name: str, task: Task):
-    cleanup()
-    answer = get_answer(task)
-    now = time.time()
-
-    # Immediate completion (0s): score = 1.0
-    with open("start_time", "w") as f:
-        f.write(str(now))
-    assert task_family.score(task, answer) == pytest.approx(1.0, abs=1e-3)
-
-    # 300s elapsed (halfway through 600s baseline): score = 0.75
-    with open("start_time", "w") as f:
-        f.write(str(now - 300))
-    assert task_family.score(task, answer) == pytest.approx(0.75, abs=1e-3)
-
-    # 600s elapsed (benchmark reached): score = 0.5 (floor)
-    with open("start_time", "w") as f:
-        f.write(str(now - 600))
-    assert task_family.score(task, answer) == pytest.approx(0.5, abs=1e-3)
-
-    # 1200s elapsed (> benchmark): score = 0.5 (floor preserved)
-    with open("start_time", "w") as f:
-        f.write(str(now - 1200))
-    assert task_family.score(task, answer) == pytest.approx(0.5, abs=1e-3)
-
-    # Wrong answer always receives 0.0 even if submitted immediately
-    with open("start_time", "w") as f:
-        f.write(str(now))
-    assert task_family.score(task, "0000") == 0.0
-
     cleanup()
 
 

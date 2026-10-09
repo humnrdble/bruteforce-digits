@@ -22,4 +22,4 @@ Docs: [Inspect](https://inspect.aisi.org.uk/), [bridge README](https://github.co
   `checker.py --serve` is started by `start()`, and `/bin/checker.sh` forwards queries to it.
 - **`/protected` + `intermediate_score()`** exists in the bridge image, but a task may not implement both `score` and
   `intermediate_score`, so it does not fit this task.
-- `inspect eval` flags used: `--model`, `--epochs`, `--time-limit`, `--sample-id`, `--log-dir`.
+- `inspect eval` flags used: `--model`, `--epochs`, `--working-limit`, `--sample-id`, `--log-dir`.
