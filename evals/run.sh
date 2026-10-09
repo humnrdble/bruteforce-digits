@@ -1,8 +1,14 @@
 #!/bin/bash
 # Builds the task image into a local registry and runs the task through METR's Inspect bridge.
 #
-# Usage: MODEL=anthropic/<model> [EPOCHS=3] evals/run.sh
+# Usage: MODEL=anthropic/<model> [EPOCHS=3] [MODEL_ARGS='provider={"max_price":{"prompt":50,"completion":50}}'] evals/run.sh
 # API keys (e.g. ANTHROPIC_API_KEY) can be put in evals/.env, see evals/.env.example.
+#
+# MODEL_ARGS is passed to inspect as -M. With openrouter/ models, `provider={"max_price":{...}}` caps the
+# price per million tokens (USD): OpenRouter only routes to providers at or below both ceilings, and the request
+# fails with a 404 ("No endpoints found that satisfy the max price") if none qualifies, instead of falling
+# back to a pricier provider. It limits the per-token price only, not total spend; use a credit limit on the
+# OpenRouter API key for that.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -32,6 +38,7 @@ uv --project "$BRIDGE" run inspect eval mtb/bridge \
     -T "image_tag=${TASK_DIR}-${VERSION}" \
     --sample-id "$TASK_DIR" \
     --model "$MODEL" \
+    ${MODEL_ARGS:+-M "$MODEL_ARGS"} \
     --epochs "$EPOCHS" \
     --working-limit "${WORKING_LIMIT:-600}" \
     --log-dir evals/logs
