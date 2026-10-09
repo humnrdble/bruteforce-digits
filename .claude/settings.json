@@ -1,0 +1,10 @@
+{
+  "enabledPlugins": {
+    "inspect-skills@meridian": true
+  },
+  "permissions": {
+    "deny": [
+      "Read(**/.env)"
+    ]
+  }
+}
