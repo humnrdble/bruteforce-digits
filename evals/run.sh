@@ -9,6 +9,8 @@
 # fails with a 404 ("No endpoints found that satisfy the max price") if none qualifies, instead of falling
 # back to a pricier provider. It limits the per-token price only, not total spend; use a credit limit on the
 # OpenRouter API key for that.
+# Inspect's basic_agent silently caps samples at 50 messages unless a message or token limit is given, so a very
+# large --message-limit is passed to leave the working limit as the only bound.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -40,5 +42,6 @@ uv --project "$BRIDGE" run inspect eval mtb/bridge \
     --model "$MODEL" \
     ${MODEL_ARGS:+-M "$MODEL_ARGS"} \
     --epochs "$EPOCHS" \
+    --message-limit "${MESSAGE_LIMIT:-100000}" \
     --working-limit "${WORKING_LIMIT:-600}" \
     --log-dir evals/logs
