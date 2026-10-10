@@ -31,7 +31,7 @@ uv --project third_party/inspect-metr-task-bridge run inspect view --log-dir eva
 `bruteforce_digits_test.py` can't run on the host: it uses `runuser` as the `agent` user and needs the root-owned checker server. Run it inside the built image, after `start()`:
 
 ```bash
-I=localhost:5001/tasks:bruteforce_digits-0.2.0
+I=localhost:5001/tasks:bruteforce_digits-0.3.0
 docker run -d --name bf-test $I sleep 600
 docker cp third_party/inspect-metr-task-bridge/mtb/taskhelper.py bf-test:/root/taskhelper.py   # the bridge injects this at run time
 docker exec -w /root bf-test python taskhelper.py --operation start --task_family_name bruteforce_digits --task_name bruteforce_digits

@@ -40,6 +40,8 @@ uv --project "$BRIDGE" run inspect eval mtb/bridge \
     -T "image_tag=${TASK_DIR}-${VERSION}" \
     --sample-id "$TASK_DIR" \
     --model "$MODEL" \
+    --solver evals/solver.py@agent \
+    --tags tool-timeout-note \
     ${MODEL_ARGS:+-M "$MODEL_ARGS"} \
     --epochs "$EPOCHS" \
     --message-limit "${MESSAGE_LIMIT:-100000}" \
