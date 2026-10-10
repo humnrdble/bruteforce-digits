@@ -85,6 +85,27 @@ All four failing models treated the task as "invert the SHA-256 hash". The hashe
 - My checker-call counts from the logs are unreliable, because many commands are stored as attachments; I read the transcripts directly for this writeup.
 - Time to solve mixes three things: how fast the model generates, whether it wasted tool time, and sandbox CPU contention. Only the first is a property of the model. `--working-limit` removes API retry and queue waits but not the other two.
 
+## Retry with the tool-timeout note (2026-10-10)
+
+Five Anthropic models were rerun with `evals/solver.py`: the tool description states the 120 s timeout and how to run longer jobs (`nohup ... > out.log 2>&1 &`), a timed-out call is no longer retried (it now returns after about 122 s and runs once), and the 50-message cap is removed. All used `max_price` 50/50 and 1 epoch. The image tag was still 0.2.0 (the task code is unchanged).
+
+| Model | First sweep | Retry | Retry details |
+|---|---|---|---|
+| haiku-4.5 | failed (609 s, working limit) | **solved**, 15 s | read the prompt, tried the checker after a single Python step |
+| haiku-5.5 | failed twice (605 s, 633 s) | **solved**, 58 s | Python loop to length 24 (45 s), then the 16 prefixes; `bc` missing again |
+| sonnet-5 | failed (629 s) | **solved**, 617 s | two 122 s timeouts; used the checker only after concluding brute force was infeasible |
+| sonnet-4.6 | failed (553 s, message limit) | failed (624 s, working limit) | 59 messages, one timeout, four `nohup` calls, never queried the checker |
+| opus-4.8 | solved (285 s) | **failed** (616 s, working limit) | 62 messages, one timeout, seven `nohup` calls, read the checker but did not use it |
+
+Three of five solved, against one of five in the first sweep. With one run each, that difference is within what the run-to-run variation can produce, and I would not credit the note for it. Observations:
+
+- **Timeouts behave as intended.** Every timed-out call now shows 122 s (down from 216 s) and ran once.
+- **The note did not stop brute force.** Opus 4.8 and Sonnet 4.6 used `nohup` to run their brute-force programs in the background, so the note helped them run the wrong strategy for longer. The models that solved it chose the checker for the same reasons as before.
+- **Leftover processes are the likely cause of the slow-CPU anomaly.** Sonnet 5's benchmark of 2 million hashes took 89 s wall time but 4 s of CPU time. It concluded the sandbox was CPU-throttled. But its earlier 8-thread `./brute 23 27` (timed out, still running) and a `nohup ./brute 20 40` were both still active, so it was measuring its own leftover jobs. The smoke test showed that an aborted command keeps running, which makes this the most likely explanation for the first sweep's anomaly too.
+- **A model's `pkill -f` killed its own shell.** Opus 4.8 ran `pkill -f /tmp/m` in the same command line as a heredoc that wrote `/tmp/m.c`. The pattern matched the command's own text, the shell died, the file was never written, and the output came back empty ("..."). It then spent several calls working out why.
+- **Sonnet 5 solved the task at 617 s total.** The working limit counts only working time, so the sample was allowed to finish, but this is a reminder that "solved" can still be very slow.
+- **`bc` was missing again** (Sonnet 5, Haiku 5.5).
+
 ## Other results from this session
 
 - **Price ceiling test:** OpenRouter's `provider.max_price` works. With a ceiling of 0.01 $/M tokens the request failed immediately (404, "No endpoints found that satisfy the max price", at the "Filter by Max Price" routing step) and no tokens were generated. With a ceiling of 5 the run proceeded normally. `evals/run.sh` accepts `MODEL_ARGS` for this. The ceiling limits price per token only, not total spend.
