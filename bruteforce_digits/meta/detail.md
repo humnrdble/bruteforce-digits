@@ -1,4 +1,4 @@
-This file provides more extensive documentation on the purpose of the task, how it works, and any potential issues. The template below is a good start, but feel free to add or delete sections as needed.
+*This file provides more extensive documentation on the purpose of the task, how it works, and any potential issues. The template below is a good start, but feel free to add or delete sections as needed.*
 
 ### Description
 
@@ -10,7 +10,7 @@ This is trivial to solve. But GPT 4o (temporary chat web interface) fails at thi
 
 ### Purpose
 
-Describes what we intend for the task(s) to test, and how well we think it does so. If relevant, includes notes about under what circumstances we expect the task to be a good vs bad measure of the intended capabilities.
+*Describes what we intend for the task(s) to test, and how well we think it does so. If relevant, includes notes about under what circumstances we expect the task to be a good vs bad measure of the intended capabilities.*
 
 Abilities: Simple problem-solving.
 
@@ -31,26 +31,25 @@ The task satisfies simple interpretations of the following Desiderata from the D
 
 ### Difficulty for Humans
 
-Describes briefly how difficult the tasks(s) are for humans. Essentially summarizes the QA run and comments on any noteworthy parts of the task.
+*Describes briefly how difficult the tasks(s) are for humans. Essentially summarizes the QA run and comments on any noteworthy parts of the task.*
 
 Using bash. Thinking of bruteforcing the answer-checker.
 
 ### Anticipated Difficulty for AI Agents
-
-Describes briefly how difficult we expect the task to be for AI agents and why. Ideally includes some commentary on how we expect different types of agents to perform if relevant (e.g multimodal vs not).
+*Describes briefly how difficult we expect the task to be for AI agents and why. Ideally includes some commentary on how we expect different types of agents to perform if relevant (e.g multimodal vs not).*
 
 GPT 4o (temporary chat web interface) fails at this task when given the instructions below.
 Hard step: Don’t get stuck brute-forcing the hash function and manually comparing the hash outputs with the desired hash.
 
 ### Training Data Contamination
 
-Are there any publicly available resources that contain a description or solution for this task? If so, link them here.
+*Are there any publicly available resources that contain a description or solution for this task? If so, link them here.*
 
-No.
+No. *[Edit: At time of submission]*
 
 ### Computational Requirements
 
-If this task involves any computationally intensive processes, e.g. training an ML model, what hardware do they need and about how long will they take to run?
+*If this task involves any computationally intensive processes, e.g. training an ML model, what hardware do they need and about how long will they take to run?*
 
 Linux.
 

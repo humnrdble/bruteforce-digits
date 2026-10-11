@@ -1,4 +1,4 @@
-A short summary of the task family. What is the agent supposed to do, and how will it be scored? One or two paragraphs is usually enough.
+*A short summary of the task family. What is the agent supposed to do, and how will it be scored? One or two paragraphs is usually enough.*
 
 I have hashed a string consisting only of the characters 0 and 1 with sha256sum. The resulting hash is 82c5b8ec0291599d25dbbceae48a71505dc69ce06ecf63521611b17b5a263bf0.
 The agent’s goal is to find the first four digits of the string I hashed. The agent is given a way to verify whether its guess is correct. It is allowed arbitrarily many attempts.
