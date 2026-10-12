@@ -41,7 +41,7 @@ VIOLET, AQUA = "#4a3aa7", "#1baf7a"  # categorical slots 7 and 3, validated as a
 
 def collect() -> pd.DataFrame:
     rows = []
-    for f in sorted(glob.glob("evals/logs/*.eval")):
+    for f in sorted(glob.glob("evals/logs/*.eval") + glob.glob("evals/logs/first_sweep/*.eval")):
         h = read_eval_log(f, header_only=True)
         model = h.eval.model
         tagged = "tool-timeout-note" in (h.eval.tags or [])
@@ -271,6 +271,54 @@ def fig_release_timeline(df: pd.DataFrame, latest_only: bool = False):
     plt.close(fig)
 
 
+def fig_release_timeline_combined(df: pd.DataFrame):
+    """Solved and failed runs in one panel, 0.3.0 runs only: first-sweep (0.2.0) runs of models rerun on 0.3.0 are dropped."""
+    import matplotlib.dates as mdates
+    FAIL_BG = "#f8e3e1"  # light tint of CRIT
+
+    rerun = set(df[df.group != FIRST].model)
+    df = df[(df.group != FIRST) | ~df.model.isin(rerun)].copy()
+    df["pub"] = pd.to_datetime(df["published"])
+    mixed = df.groupby("model").solved.nunique()
+    if (mixed > 1).any():
+        raise ValueError(f"models with differing results across runs: {sorted(mixed[mixed > 1].index)}")
+    n_runs = len(df)
+    df = df.drop_duplicates("model")
+    order = df.groupby("model").pub.first().sort_values(kind="stable").index.tolist()
+    fig, ax = plt.subplots(figsize=(11, 0.3 * len(order) + 2.2), facecolor=SURFACE)
+    style(ax)
+    marker = {"anthropic": "o", "openai": "D"}
+    for i, m in enumerate(order):
+        r = df[df.model == m].iloc[0]
+        if r.solved:
+            ax.scatter([r.pub], [i], s=85, color=GOOD, marker=marker[r.provider], edgecolor=SURFACE, linewidth=2, zorder=3)
+        else:  # tinted row plus a hollow red marker, so failures differ in fill as well as hue
+            ax.axhspan(i - 0.5, i + 0.5, color=FAIL_BG, linewidth=0, zorder=1)
+            ax.scatter([r.pub], [i], s=85, facecolor=FAIL_BG, marker=marker[r.provider], edgecolor=CRIT, linewidth=2.4, zorder=3)
+    ax.set_yticks(range(len(order)))
+    ax.set_yticklabels(order, color=INK, fontsize=9.5)
+    ax.invert_yaxis()
+    ax.set_ylim(len(order) - 0.4, -0.7)
+    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 4, 7, 10]))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
+    ax.set_xlim(pd.Timestamp("2024-10-01"), pd.Timestamp("2026-11-15"))
+    ax.set_xlabel("Model published on OpenRouter (oldest model at the top)", color=INK2, fontsize=9.5)
+    fig.suptitle("Release date does not separate solved from failed runs", x=0.02, y=0.99, ha="left", fontsize=14,
+                 fontweight="semibold", color=INK)
+    fig.text(0.02, 0.945, f"One dot per model, placed at its publication date; {int(df.solved.sum())} solved, "
+             f"{int((~df.solved).sum())} failed ({n_runs} runs; failed rows shaded). Models rerun on 0.3.0 use only their 0.3.0 runs.", color=INK2, fontsize=9.5, ha="left")
+    h = [plt.Line2D([], [], marker="o", color=SURFACE, markerfacecolor=GOOD, markersize=9, linestyle=""),
+         plt.Line2D([], [], marker="o", color=SURFACE, markerfacecolor=FAIL_BG, markeredgecolor=CRIT, markeredgewidth=2.4,
+                    markersize=9, linestyle=""),
+         plt.Line2D([], [], marker="o", color=SURFACE, markerfacecolor=MUTED, markersize=9, linestyle=""),
+         plt.Line2D([], [], marker="D", color=SURFACE, markerfacecolor=MUTED, markersize=9, linestyle="")]
+    fig.legend(h, ["Solved", "Failed", "Anthropic (circle)", "OpenAI (diamond)"], loc="upper left",
+               bbox_to_anchor=(0.015, 0.925), ncol=4, frameon=False, fontsize=9.5, labelcolor=INK2)
+    fig.subplots_adjust(top=0.85)
+    fig.savefig(f"{OUT}/fig4_release_timeline_0.3.0_only.png", dpi=150, facecolor=SURFACE, bbox_inches="tight")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     df = collect()
     df.drop(columns=["created"]).to_csv(f"{OUT}/runs.csv", index=False)
@@ -283,4 +331,4 @@ if __name__ == "__main__":
     fig_scatter(df)
     fig_outcomes(df)
     fig_release_timeline(df)
-    fig_release_timeline(df, latest_only=True)
+    fig_release_timeline_combined(df)
