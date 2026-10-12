@@ -216,11 +216,15 @@ def fig_outcomes(df: pd.DataFrame):
     plt.close(fig)
 
 
-def fig_release_timeline(df: pd.DataFrame):
+def fig_release_timeline(df: pd.DataFrame, latest_only: bool = False):
+    """latest_only drops first-sweep (0.2.0) runs of models that were rerun on 0.3.0."""
     import matplotlib.dates as mdates
     from matplotlib.transforms import ScaledTranslation
 
     df = df.copy()
+    if latest_only:
+        rerun = set(df[df.group != FIRST].model)
+        df = df[(df.group != FIRST) | ~df.model.isin(rerun)]
     df["pub"] = pd.to_datetime(df["published"])
     lanes = [("Solved", True), ("Failed", False)]
     nrows = [df[df.solved == v].model.nunique() for _, v in lanes]
@@ -253,13 +257,17 @@ def fig_release_timeline(df: pd.DataFrame):
     ax.set_xlabel("Model published on OpenRouter", color=INK2, fontsize=9.5)
     fig.suptitle("Release date does not separate solved from failed runs", x=0.02, y=0.985, ha="left", fontsize=14,
                  fontweight="semibold", color=INK)
-    fig.text(0.02, 0.945, "One dot per run, placed at the model's publication date. Repeated runs of a model sit side by side. "
-             "The newest model, haiku-5.5, appears in both lanes.", color=INK2, fontsize=9.5, ha="left")
+    both = sorted(set(df[df.solved].model) & set(df[~df.solved].model))
+    note = f" {', '.join(both)} appears in both lanes." if both else ""
+    if latest_only:
+        note += " Models rerun on 0.3.0 show only the 0.3.0 runs."
+    fig.text(0.02, 0.945, "One dot per run, placed at the model's publication date. Repeated runs of a model sit side by side."
+             + note, color=INK2, fontsize=9.5, ha="left")
     h = [plt.Line2D([], [], marker=marker[k], color=SURFACE, markerfacecolor=color[k], markersize=9, linestyle="")
          for k in ("anthropic", "openai")]
     fig.legend(h, ["Anthropic", "OpenAI"], loc="upper right", bbox_to_anchor=(0.985, 0.99), ncol=2, frameon=False,
                fontsize=9.5, labelcolor=INK2)
-    fig.savefig(f"{OUT}/fig4_release_timeline.png", dpi=150, facecolor=SURFACE, bbox_inches="tight")
+    fig.savefig(f"{OUT}/fig4_release_timeline{'_0.3.0_only' if latest_only else ''}.png", dpi=150, facecolor=SURFACE, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -275,3 +283,4 @@ if __name__ == "__main__":
     fig_scatter(df)
     fig_outcomes(df)
     fig_release_timeline(df)
+    fig_release_timeline(df, latest_only=True)

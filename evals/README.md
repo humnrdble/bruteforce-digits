@@ -1,4 +1,5 @@
 # Running the task
+\[AI-generated]
 
 The task is run with [Inspect](https://inspect.aisi.org.uk/) through METR's
 [inspect-metr-task-bridge](https://github.com/METR/inspect-metr-task-bridge), which is a git submodule in
@@ -25,4 +26,3 @@ Each time `bruteforce_digits/manifest.yaml`'s `version` changes, a new image tag
 
 - 0.2.0: binary scoring (1.0 or 0.0), time judged externally. Runs used the bridge's default agent: tool calls time out after 120 s, a timed-out call is retried by Inspect (about 216 s per timeout), the model is not told, and Inspect's 50-message default applies.
 - 0.3.0: same task code as 0.2.0, run with `evals/solver.py`: tool descriptions state the timeout and how to run longer jobs, a timed-out call is not retried (about 120 s, run once), and `run.sh` removes the 50-message cap. Runs carry the tag `tool-timeout-note`.
-- The first retry of five Anthropic models (2026-10-10) used the 0.3.0 setup under the 0.2.0 image tag, because it started before the bump. The tag `tool-timeout-note` identifies them.
