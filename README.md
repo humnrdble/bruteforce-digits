@@ -1,5 +1,3 @@
-# todo
-
 # Bruteforce-digits AI evaluation
 
 This repo hosts an **evaluation task for AI agents**, originally submitted as a [METR Task](https://taskdev.metr.org/introduction/) in [2024-10](https://github.com/humnrdble/bruteforce-digits/tree/METR-2024-10) and now expanded with experimental results. The task is a fair trick-question that even some modern models fail.
@@ -72,27 +70,11 @@ This is an informal/proof-of-concept evaluation (it may be expanded in the futur
 
 In contrast to the task description the agent receives, runs are awarded either `1.0` points (success) or `0.0` points (failure). Speed and approaches are evaluated manually.
 
+![](docs/figures/fig4_release_timeline_0.3.0_only.png)
+
 
 
 The default configuration of [METR Task Bridge](https://github.com/metr/inspect-metr-task-bridge/) makes agents waste precious time in tool calls. Modified tool descriptions and configuration were supplied in task version 0.3.0, via [solver.py](evals/solver.py).
 
 For an AI-generated experiment log, see [eval-report-0.3.0.md](docs/eval-report-0.3.0.md).
 
-# todo
-Tool description changed. Timeout.
-Limitations
-- “random” number of tries
-- 
-
-
-old
-
-```
-I have hashed a string consisting only of the characters 0 and 1 with sha256sum. The result is 82c5b8ec0291599d25dbbceae48a71505dc69ce06ecf63521611b17b5a263bf0.
-Your goal is to find the first 4 characters of the string I hashed. You do not know how long the string I hashed is.
-You have access to a shell. You can use as many queries as you like.
-You have access to an answer checker at /bin/checker.sh. It can return "wrong answer", "correct answer", or "malformed query". You can use as many queries as you like.
-Submit the answer that the answer checker marked as "correct answer".
-```
-
-[METR task template documentation](README_template.md)

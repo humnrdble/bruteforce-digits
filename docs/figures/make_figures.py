@@ -39,6 +39,26 @@ COMPANY = {"anthropic": "Anthropic", "openai": "OpenAI"}
 VIOLET, AQUA = "#4a3aa7", "#1baf7a"  # categorical slots 7 and 3, validated as a pair (all-pairs)
 
 
+def tool_text(result) -> str:
+    if isinstance(result, str):
+        return result
+    return " ".join(getattr(c, "text", "") or "" for c in result or [])
+
+
+# Route to the answer (figure 4). Solved runs are sorted by the tool seconds spent before the checker first said
+# "correct answer"; the observed values fall into three groups with wide gaps (0-4 s, 46-52 s, 260 s and up).
+DIRECT_MAX_S, DETOUR_MAX_S = 10, 120  # 120 s is about one tool timeout
+
+
+def route(r) -> str:
+    """✓ checker first, → brief brute-force detour, ↷ late pivot, ⏱ working limit hit, ✗ submitted a wrong answer."""
+    if not r.solved:
+        return "⏱" if r.ended_by == "working" else "✗"
+    if pd.isna(r.to_answer_s):
+        raise ValueError(f"solved run without a checker reply: {r.log}")
+    return "✓" if r.to_answer_s <= DIRECT_MAX_S else "→" if r.to_answer_s <= DETOUR_MAX_S else "↷"
+
+
 def collect() -> pd.DataFrame:
     rows = []
     for f in sorted(glob.glob("evals/logs/*.eval") + glob.glob("evals/logs/first_sweep/*.eval")):
@@ -48,16 +68,19 @@ def collect() -> pd.DataFrame:
         image = h.eval.task_args.get("image_tag", "")
         if not model.startswith(("openrouter/anthropic", "openrouter/openai")) or not image.startswith("bruteforce_digits-"):
             continue
-        log = read_eval_log(f)
+        log = read_eval_log(f, resolve_attachments=True)
         if not log.samples:
             continue
         smp = log.samples[0]
         gen = tool = 0.0
         timeouts = 0
+        to_answer = None  # tool seconds spent before the checker first replied "correct answer"
         for e in smp.events:
             if e.event == "model":
                 gen += e.working_time or 0
             elif e.event == "tool":
+                if to_answer is None and e.function != "submit" and "correct answer" in tool_text(e.result).lower():
+                    to_answer = tool
                 tool += e.working_time or 0
                 if getattr(e, "error", None) is not None and e.error.type == "timeout":
                     timeouts += 1
@@ -76,6 +99,7 @@ def collect() -> pd.DataFrame:
                 generation_s=round(gen, 1),
                 tool_s=round(tool, 1),
                 other_s=round(max(smp.working_time - gen - tool, 0), 1),
+                to_answer_s=round(to_answer, 1) if score == 1.0 and to_answer is not None else None,
                 messages=len(smp.messages),
                 ended_by=smp.limit.type if smp.limit else "submit",
                 timeouts=timeouts,
@@ -271,6 +295,40 @@ def fig_release_timeline(df: pd.DataFrame, latest_only: bool = False):
     plt.close(fig)
 
 
+class Glyph:
+    """Legend handle for a route mark: a text glyph, or the drawn clock when `ch` is "⏱" (DejaVu Sans lacks that glyph)."""
+
+    def __init__(self, ch, color):
+        self.ch, self.color = ch, color
+
+
+def _clock_path():
+    from matplotlib.path import Path
+    c = Path.unit_circle()
+    verts = list(c.vertices) + [(0, 0), (0, 0.62), (0, 0), (0.42, 0)]  # circle, minute hand up, hour hand right
+    codes = list(c.codes) + [Path.MOVETO, Path.LINETO, Path.MOVETO, Path.LINETO]
+    return Path(verts, codes)
+
+
+CLOCK = _clock_path()
+
+
+from matplotlib.legend_handler import HandlerBase
+
+
+class GlyphHandler(HandlerBase):
+    def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
+        from matplotlib.text import Text
+        cx, cy = xdescent + width / 2, ydescent + height / 2
+        if orig_handle.ch == "⏱":
+            a = plt.Line2D([cx], [cy], linestyle="", marker=CLOCK, markersize=10, markerfacecolor="none",
+                           markeredgecolor=orig_handle.color, markeredgewidth=1.6)
+        else:
+            a = Text(cx, cy, orig_handle.ch, color=orig_handle.color, fontsize=13, fontweight="bold", ha="center", va="center")
+        a.set_transform(trans)
+        return [a]
+
+
 def fig_release_timeline_combined(df: pd.DataFrame):
     """Solved and failed runs in one panel, 0.3.0 runs only: first-sweep (0.2.0) runs of models rerun on 0.3.0 are dropped."""
     import matplotlib.dates as mdates
@@ -282,10 +340,14 @@ def fig_release_timeline_combined(df: pd.DataFrame):
     mixed = df.groupby("model").solved.nunique()
     if (mixed > 1).any():
         raise ValueError(f"models with differing results across runs: {sorted(mixed[mixed > 1].index)}")
+    df["route"] = df.apply(route, axis=1)
+    mixed_route = df.groupby("model").route.nunique()
+    if (mixed_route > 1).any():
+        raise ValueError(f"models with differing routes across runs: {sorted(mixed_route[mixed_route > 1].index)}")
     n_runs = len(df)
     df = df.drop_duplicates("model")
     order = df.groupby("model").pub.first().sort_values(kind="stable").index.tolist()
-    fig, ax = plt.subplots(figsize=(11, 0.3 * len(order) + 2.2), facecolor=SURFACE)
+    fig, ax = plt.subplots(figsize=(11, 0.3 * len(order) + 2.6), facecolor=SURFACE)
     style(ax)
     marker = {"anthropic": "o", "openai": "D"}
     for i, m in enumerate(order):
@@ -293,8 +355,22 @@ def fig_release_timeline_combined(df: pd.DataFrame):
         if r.solved:
             ax.scatter([r.pub], [i], s=85, color=GOOD, marker=marker[r.provider], edgecolor=SURFACE, linewidth=2, zorder=3)
         else:  # tinted row plus a hollow red marker, so failures differ in fill as well as hue
-            ax.axhspan(i - 0.5, i + 0.5, color=FAIL_BG, linewidth=0, zorder=1)
+            ax.axhspan(i - 0.5, i + 0.5, xmin=-0.04, xmax=1, clip_on=False, color=FAIL_BG, linewidth=0, zorder=1)
             ax.scatter([r.pub], [i], s=85, facecolor=FAIL_BG, marker=marker[r.provider], edgecolor=CRIT, linewidth=2.4, zorder=3)
+    # route column next to the model names (x in axes fraction, y in data units)
+    col = -0.022
+    ax.tick_params(axis="y", pad=26)
+    ax.text(col, -1.15, "Route", transform=ax.get_yaxis_transform(), color=INK, fontsize=9, fontweight="semibold",
+            ha="center", va="center", clip_on=False)
+    for i, m in enumerate(order):
+        mark = df[df.model == m].route.iloc[0]
+        color = {"✓": GOOD, "→": INK2, "↷": INK2}.get(mark, CRIT)
+        if mark == "⏱":
+            ax.scatter([col], [i], s=95, marker=CLOCK, facecolor="none", edgecolor=color, linewidth=1.6,
+                       transform=ax.get_yaxis_transform(), clip_on=False, zorder=4)
+        else:
+            ax.text(col, i, mark, transform=ax.get_yaxis_transform(), color=color, fontsize=13, fontweight="bold",
+                    ha="center", va="center", clip_on=False)
     ax.set_yticks(range(len(order)))
     ax.set_yticklabels(order, color=INK, fontsize=9.5)
     ax.invert_yaxis()
@@ -314,7 +390,13 @@ def fig_release_timeline_combined(df: pd.DataFrame):
          plt.Line2D([], [], marker="D", color=SURFACE, markerfacecolor=MUTED, markersize=9, linestyle="")]
     fig.legend(h, ["Solved", "Failed", "Anthropic (circle)", "OpenAI (diamond)"], loc="upper left",
                bbox_to_anchor=(0.015, 0.925), ncol=4, frameon=False, fontsize=9.5, labelcolor=INK2)
-    fig.subplots_adjust(top=0.85)
+    keys = [(Glyph("✓", GOOD), "checker first"),
+            (Glyph("→", INK2), f"brute-force detour, then checker (under {DETOUR_MAX_S} s of tool time)"),
+            (Glyph("↷", INK2), f"late pivot to the checker (over {DETOUR_MAX_S} s)"),
+            (Glyph("⏱", CRIT), "working limit hit"), (Glyph("✗", CRIT), "wrong answer submitted")]
+    fig.legend([k for k, _ in keys], [t for _, t in keys], handler_map={Glyph: GlyphHandler()}, loc="upper left", bbox_to_anchor=(0.015, 0.885), ncol=5,
+               frameon=False, fontsize=9, labelcolor=INK2, columnspacing=1.2, handletextpad=0.2, handlelength=1.4)
+    fig.subplots_adjust(top=0.81)
     fig.savefig(f"{OUT}/fig4_release_timeline_0.3.0_only.png", dpi=150, facecolor=SURFACE, bbox_inches="tight")
     plt.close(fig)
 

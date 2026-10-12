@@ -32,6 +32,22 @@ All figures are made by [figures/make_figures.py](figures/make_figures.py) from 
 
 Figure 4 uses each model's publication date as OpenRouter lists it (the `created` field, read with the OpenRouter MCP on 2026-10-11; see [figures/model_dates.csv](figures/model_dates.csv)). That is the listing date, which can differ slightly from the vendor's announcement.
 
+![One dot per model with the route each model took to the answer](figures/fig4_release_timeline_0.3.0_only.png)
+
+Figure 4b shows one row per model, using only the 0.3.0 runs of models that were rerun (their 0.2.0 first-sweep runs are left out). The failed rows are shaded. If a model has several runs, they must agree on result and route, otherwise the script stops with an error. The **Route** column says how the model reached its answer:
+
+| Mark | Meaning | Rule |
+|---|---|---|
+| ✓ | checker first | the checker said "correct answer" after 10 s or less of tool time (observed: 0 to 4 s) |
+| → | brute-force detour, then checker | after more than 10 s and up to 120 s (observed: 46 to 52 s) |
+| ↷ | late pivot to the checker | after more than 120 s, about one tool timeout (observed: 260 s and up) |
+| clock | working limit hit | the run failed and was ended by the 600 s working limit |
+| ✗ | wrong answer submitted | the run failed by submitting |
+
+The measure is the tool time spent before the checker first replied "correct answer" (`to_answer_s` in [figures/runs.csv](figures/runs.csv); empty for failed runs). It counts tool time, not total time, so a slow model is not marked as taking a detour. It looks for the "correct answer" reply, not the first checker query. A run that probes the checker, goes back to brute force and returns to the checker therefore counts as late. The `submit` tool is ignored, because gpt-4o's submitted text contained the phrase "the correct answer". The observed values form three groups with wide gaps, so no run sits near a cut-off; the cut-offs are my choice, not something the task defines.
+
+This classification differs from the frozen [eval-writeup.md](eval-writeup.md) for one model: opus-4.5 is grouped there under "brute force briefly, then the checker", but it spent 261 s in tools (mostly one timeout) before the checker, so the figure marks it as a late pivot. I have not read the transcripts again to check the labels; they come from the log timings only.
+
 ## Results
 
 ### OpenAI queue (2026-10-10, 1 epoch each)
