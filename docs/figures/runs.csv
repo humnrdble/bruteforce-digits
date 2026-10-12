@@ -1,0 +1,28 @@
+group,model,provider,solved,total_s,working_s,generation_s,tool_s,other_s,messages,ended_by,timeouts,log,label,published
+First sweep (default tools),opus-4.7,anthropic,True,10.2,9.8,7.3,0.4,2.1,8,submit,0,2026-10-09T20-07-20+00-00_bruteforce-digits_D5aL5G6DbvMsuZ2AzecyCm.eval,opus-4.7,2026-04-16
+First sweep (default tools),opus-5.5,anthropic,True,10.7,10.4,7.5,0.3,2.6,6,submit,0,2026-10-09T20-14-00+00-00_bruteforce-digits_RVqzjbqJ6CSzCkZkVwXJ98.eval,opus-5.5,2026-09-22
+First sweep (default tools),sonnet-5.5,anthropic,True,13.4,13.1,10.0,0.9,2.1,11,submit,0,2026-10-09T20-36-21+00-00_bruteforce-digits_mSvwriGi4GqnjTydYCbLFC.eval,sonnet-5.5 #1,2026-09-28
+First sweep (default tools),sonnet-5.5,anthropic,True,16.0,15.3,12.3,0.9,2.2,11,submit,0,2026-10-09T19-32-50+00-00_bruteforce-digits_h5zPxttzBF24t68vAcpcoC.eval,sonnet-5.5 #2,2026-09-28
+First sweep (default tools),sonnet-4.5,anthropic,True,38.7,38.1,32.8,3.0,2.3,32,submit,0,2026-10-09T20-15-23+00-00_bruteforce-digits_HjA6YohSZ4dA4NphydFNTb.eval,sonnet-4.5,2025-09-29
+First sweep (default tools),sonnet-4,anthropic,True,47.7,47.0,39.7,4.1,3.1,42,submit,0,2026-10-09T20-14-23+00-00_bruteforce-digits_iGsPFJorraJLk69ay6cdpJ.eval,sonnet-4,2025-05-22
+First sweep (default tools),opus-5,anthropic,True,67.3,67.0,12.0,52.6,2.4,9,submit,0,2026-10-09T20-12-41+00-00_bruteforce-digits_dfEUaQf7cjwbhbUSBYL2Gj.eval,opus-5,2026-07-24
+First sweep (default tools),opus-4.6,anthropic,True,70.1,69.7,16.4,50.7,2.6,10,submit,0,2026-10-09T20-05-58+00-00_bruteforce-digits_TmxEfSJoLaP5NesVLtPbGQ.eval,opus-4.6,2026-02-04
+First sweep (default tools),opus-4.1,anthropic,True,90.0,89.5,85.2,2.0,2.2,18,submit,0,2026-10-09T19-59-04+00-00_bruteforce-digits_ihf5Ma8Ezfp7NYVM8sMDZX.eval,opus-4.1,2025-08-05
+First sweep (default tools),opus-4.8,anthropic,True,285.4,285.1,18.1,260.9,6.0,14,submit,1,2026-10-09T20-07-42+00-00_bruteforce-digits_bcYoezKixJsY8UjCutSuHJ.eval,opus-4.8,2026-05-27
+First sweep (default tools),opus-4.5,anthropic,True,292.4,292.0,22.0,263.0,7.0,28,submit,1,2026-10-09T20-00-46+00-00_bruteforce-digits_V4SQtHj3hVpvSnaugxgEVF.eval,opus-4.5,2025-11-24
+First sweep (default tools),sonnet-4.6,anthropic,False,552.7,551.8,81.6,464.3,5.9,50,message,1,2026-10-09T20-16-13+00-00_bruteforce-digits_XhksQZ68AwUtbiq9DdSstb.eval,sonnet-4.6,2026-02-17
+First sweep (default tools),haiku-5.5,anthropic,False,605.4,604.9,13.5,371.0,220.4,11,working,1,2026-10-09T19-40-16+00-00_bruteforce-digits_Gau5SBTF6GkgaHjpZwKHYh.eval,haiku-5.5 #1,2026-10-07
+First sweep (default tools),haiku-4.5,anthropic,False,609.5,609.1,27.3,445.7,136.0,15,working,2,2026-10-09T20-36-45+00-00_bruteforce-digits_PBB3hyxbt8sX5EZEmwieCh.eval,haiku-4.5,2025-10-15
+First sweep (default tools),sonnet-5,anthropic,False,629.5,628.8,89.5,437.1,102.2,35,working,1,2026-10-09T20-25-40+00-00_bruteforce-digits_j9D3GwNncLaHciAiPhk6Ey.eval,sonnet-5,2026-06-30
+First sweep (default tools),haiku-5.5,anthropic,False,632.7,632.2,33.4,563.2,35.6,23,working,2,2026-10-09T20-47-06+00-00_bruteforce-digits_BU7V6Z7PebMFbUuzYVs2eW.eval,haiku-5.5 #2,2026-10-07
+OpenAI runs (tool-timeout note),gpt-4.1,openai,True,10.7,10.4,5.2,2.9,2.3,21,submit,0,2026-10-10T10-03-24+00-00_bruteforce-digits_8uXK8hvjeK2Tu5AZwQtzEq.eval,gpt-4.1,2025-04-14
+OpenAI runs (tool-timeout note),gpt-6-sol,openai,True,10.9,10.6,7.4,1.0,2.2,10,submit,0,2026-10-10T09-57-59+00-00_bruteforce-digits_meGWHUAEy8CtJCYpMzc2Hq.eval,gpt-6-sol,2026-09-22
+OpenAI runs (tool-timeout note),gpt-6-luna,openai,True,33.0,32.5,29.7,0.7,2.2,10,submit,0,2026-10-10T09-58-23+00-00_bruteforce-digits_WciBdBNRe6pDu8he9uicMo.eval,gpt-6-luna,2026-09-22
+OpenAI runs (tool-timeout note),gpt-oss-120b,openai,True,72.4,71.7,19.4,49.7,2.6,12,submit,0,2026-10-10T10-03-48+00-00_bruteforce-digits_SDFnL9y5XNM8cL5JNXzvNb.eval,gpt-oss-120b,2025-08-05
+OpenAI runs (tool-timeout note),gpt-5.4-mini,openai,False,245.2,244.9,7.7,234.3,2.9,10,submit,1,2026-10-10T09-59-07+00-00_bruteforce-digits_h8YcWoWEsREY2XRsmRS7en.eval,gpt-5.4-mini,2026-03-17
+OpenAI runs (tool-timeout note),gpt-4o-2024-11-20,openai,False,766.6,499.6,201.4,292.2,6.0,382,submit,2,2026-10-11T06-00-32+00-00_bruteforce-digits_AnGPDFBQ78mhYwVUpCWsTB.eval,gpt-4o-2024-11-20,2024-11-20
+Retry (tool-timeout note),haiku-4.5,anthropic,True,14.9,14.5,11.0,1.0,2.5,12,submit,0,2026-10-10T09-45-47+00-00_bruteforce-digits_bALsrNSYfSrPevZHGYXu6b.eval,haiku-4.5,2025-10-15
+Retry (tool-timeout note),haiku-5.5,anthropic,True,58.2,57.8,9.2,46.5,2.2,11,submit,0,2026-10-10T09-46-14+00-00_bruteforce-digits_QbwUSwxdotUVqtwG2KcShX.eval,haiku-5.5,2026-10-07
+Retry (tool-timeout note),opus-4.8,anthropic,False,615.6,614.8,90.1,482.7,42.1,62,working,1,2026-10-10T09-47-24+00-00_bruteforce-digits_iHaEUzc5Sd2eUSkYrgWAFr.eval,opus-4.8,2026-05-27
+Retry (tool-timeout note),sonnet-5,anthropic,True,616.8,616.3,101.7,496.5,18.1,32,submit,2,2026-10-10T09-35-16+00-00_bruteforce-digits_R67T2sppZ7hgt5d5zCrspY.eval,sonnet-5,2026-06-30
+Retry (tool-timeout note),sonnet-4.6,anthropic,False,624.0,623.2,85.8,486.6,50.8,59,working,1,2026-10-10T09-24-35+00-00_bruteforce-digits_hwABJuFbxRzZM4E39GSULd.eval,sonnet-4.6,2026-02-17
