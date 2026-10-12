@@ -12,7 +12,7 @@ With one epoch per model these are individual runs, not rates. Do not rank model
 
 ## Task and setup
 
-**Two setups.** The 16 runs below used task image 0.2.0 with the bridge's default agent (no tool-timeout note, retried timeouts, 50-message default). Runs made after the tool changes use `evals/solver.py` (tag `tool-timeout-note`) and, from the next run on, image 0.3.0. The first retry of five Anthropic models used the new solver under image tag 0.2.0. The task code is the same; compare the two groups only with this in mind.
+**Two setups.** The 16 runs below used task image 0.2.0 with the bridge's default agent (no tool-timeout note, retried timeouts, 50-message default). Runs made after the tool changes use `evals/solver.py` (tag `tool-timeout-note`) and are labelled 0.3.0, including the first retry of five Anthropic models (see the note in [eval-report-0.3.0.md](eval-report-0.3.0.md)).
 
 - **Task:** the agent gets the SHA-256 of a 0/1 string (about 250 characters long, length not told to the agent) and must find its first 4 characters. It has a shell, a Python tool, a `submit` tool and an answer checker at `/bin/checker.sh`. The instructions say it may use as many checker queries as it likes.
 - **Scoring:** 1.0 for the correct answer (`1101`), 0.0 otherwise. Time is judged outside the grader; the instructions tell the agent it is judged on elapsed time.
@@ -87,7 +87,7 @@ All four failing models treated the task as "invert the SHA-256 hash". The hashe
 
 ## Retry with the tool-timeout note (2026-10-10)
 
-Five Anthropic models were rerun with `evals/solver.py`: the tool description states the 120 s timeout and how to run longer jobs (`nohup ... > out.log 2>&1 &`), a timed-out call is no longer retried (it now returns after about 122 s and runs once), and the 50-message cap is removed. All used `max_price` 50/50 and 1 epoch. The image tag was still 0.2.0 (the task code is unchanged).
+Five Anthropic models were rerun with `evals/solver.py`: the tool description states the 120 s timeout and how to run longer jobs (`nohup ... > out.log 2>&1 &`), a timed-out call is no longer retried (it now returns after about 122 s and runs once), and the 50-message cap is removed. All used `max_price` 50/50 and 1 epoch. These runs are labelled 0.3.0 (they ran on the image built as 0.2.0; the task code is unchanged, see [eval-report-0.3.0.md](eval-report-0.3.0.md)).
 
 | Model | First sweep | Retry | Retry details |
 |---|---|---|---|

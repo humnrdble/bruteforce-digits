@@ -8,13 +8,13 @@ Status: in progress. New results are added here. The earlier report, [eval-write
 - **Agent:** `evals/solver.py`, passed with `--solver`. The `bash` and `python` tool descriptions state the 120 s timeout and how to run longer jobs (`nohup ... > out.log 2>&1 &`). A timed-out call is not retried by Inspect: it returns after about 122 s and the command runs once. The aborted command keeps running in the container.
 - **Limits:** `--working-limit 600`, no message limit (`MESSAGE_LIMIT` default 100000, so Inspect's 50-message default does not apply).
 - **Run config:** `evals/run.sh`, 1 epoch per model unless noted, tag `tool-timeout-note`, OpenRouter with `max_price` 50/50 ($ per million tokens), logs in `evals/logs/`.
-- **Image:** the first retry of five Anthropic models used the new solver under the 0.2.0 image tag (started before the bump); runs from the OpenAI queue onward build and use the 0.3.0 image.
+- **Image and relabelling:** the retry of five Anthropic models ran on the image built and tagged `bruteforce_digits-0.2.0`, because it started before the version bump. The task code in that image is identical to 0.3.0 (the bump only marked the new harness). On 2026-10-12 the five retry logs (`evals/logs/2026-10-10T09-24-35` to `09-47-24`) were edited so that `task_version` and `task_args.image_tag` read 0.3.0 (header and journal only; samples, scores and messages are unchanged; the originals were kept outside the repo), and the retry section of the frozen [eval-writeup.md](eval-writeup.md) was changed to match. This is a labelling change, not a rerun. The 16 first-sweep runs stay at 0.2.0.
 
 ## Runs so far
 
 | Group | Models | Where reported |
 |---|---|---|
-| Anthropic retry (new solver, image tag 0.2.0) | sonnet-4.6, sonnet-5, haiku-4.5, haiku-5.5, opus-4.8 | frozen report, "Retry with the tool-timeout note" |
+| Anthropic retry (new solver, 0.3.0) | sonnet-4.6, sonnet-5, haiku-4.5, haiku-5.5, opus-4.8 | frozen report, "Retry with the tool-timeout note" |
 | OpenAI queue (new solver, image 0.3.0) | gpt-6-sol, gpt-6-luna, gpt-5.4-mini, gpt-4.1, gpt-oss-120b | analysed below |
 | One more OpenAI run (new solver, started 2026-10-11 06:00 UTC, not by this session's queue) | gpt-4o-2024-11-20 | analysed below, briefly |
 
