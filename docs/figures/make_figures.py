@@ -342,10 +342,11 @@ def route_markdown(runs: pd.DataFrame, order: list, n_runs: int) -> str:
     return "\n".join(lines)
 
 
-def fig_release_timeline_combined(df: pd.DataFrame, bare: bool = False):
+def fig_release_timeline_combined(df: pd.DataFrame, bare: bool = False, subtitle: bool = False):
     """Solved and failed runs in one panel, 0.3.0 runs only: first-sweep (0.2.0) runs of models rerun on 0.3.0 are dropped.
 
-    bare=True leaves out the title and subtitle; the solved/failed/provider key stays on top and the route key follows it. Both layouts show the route key in two lines above the axes.
+    subtitle=True adds a line under the title with the counts and the rerun rule; it is saved with the suffix _subtitle.
+    bare=True leaves out the title; the solved/failed/provider key stays on top and the route key follows it. Both layouts show the route key in two lines above the axes.
     The normal version also writes the Markdown table."""
     import matplotlib.dates as mdates
     FAIL_BG = "#f8e3e1"  # light tint of CRIT
@@ -367,7 +368,7 @@ def fig_release_timeline_combined(df: pd.DataFrame, bare: bool = False):
     if not bare:
         with open(f"{OUT}/fig4_release_timeline_0.3.0_only.md", "w") as fh:
             fh.write(route_markdown(runs, order, n_runs))
-    fig, ax = plt.subplots(figsize=(11, 0.3 * len(order) + (1.6 if bare else 2.8)), facecolor=SURFACE)
+    fig, ax = plt.subplots(figsize=(11, 0.3 * len(order) + (1.6 if bare else 2.8 if subtitle else 2.5)), facecolor=SURFACE)
     style(ax)
     marker = {"anthropic": "o", "openai": "D"}
     for i, m in enumerate(order):
@@ -399,11 +400,14 @@ def fig_release_timeline_combined(df: pd.DataFrame, bare: bool = False):
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
     ax.set_xlim(pd.Timestamp("2024-10-01"), pd.Timestamp("2026-11-15"))
     ax.set_xlabel("Model published on OpenRouter (oldest model at the top)", color=INK2, fontsize=9.5)
+    subtitle = subtitle and not bare
     if not bare:
         fig.suptitle("Results and route to the answer, by model release date", x=0.02, y=0.99, ha="left", fontsize=14,
                      fontweight="semibold", color=INK)
-        fig.text(0.02, 0.945, f"One dot per model, placed at its publication date; {int(df.solved.sum())} solved, "
-                 f"{int((~df.solved).sum())} failed ({n_runs} runs; failed rows shaded). Models rerun on 0.3.0 use only their 0.3.0 runs.", color=INK2, fontsize=9.5, ha="left")
+        if subtitle:
+            fig.text(0.02, 0.945, f"One dot per model, placed at its publication date; {int(df.solved.sum())} solved, "
+                     f"{int((~df.solved).sum())} failed ({n_runs} runs; failed rows shaded). Models rerun on 0.3.0 use only their 0.3.0 runs.",
+                     color=INK2, fontsize=9.5, ha="left")
     h = [plt.Line2D([], [], marker="o", color=SURFACE, markerfacecolor=GOOD, markersize=9, linestyle=""),
          plt.Line2D([], [], marker="o", color=SURFACE, markerfacecolor=FAIL_BG, markeredgecolor=CRIT, markeredgewidth=2.4,
                     markersize=9, linestyle=""),
@@ -415,19 +419,19 @@ def fig_release_timeline_combined(df: pd.DataFrame, bare: bool = False):
             (Glyph("⏱", CRIT), "working limit hit"), (Glyph("✗", CRIT), "wrong answer submitted")]
     # bare: the solved/failed/provider key sits directly above the Route header
     where1 = (dict(bbox_to_anchor=(-0.17, 1.15), bbox_transform=ax.transAxes, loc="lower left") if bare
-              else dict(bbox_to_anchor=(0.015, 0.925), loc="upper left"))
+              else dict(bbox_to_anchor=(0.015, 0.925 if subtitle else 0.95), loc="upper left"))
     fig.legend(h, ["Solved", "Failed", "Anthropic (circle)", "OpenAI (diamond)"], ncol=4, frameon=False,
                fontsize=9.5, labelcolor=INK2, **where1)
     # route key in two lines above the axes in both layouts (in the bare figure it sits between the solved/failed key and the Route header),
     # each line a separate one-row legend so the entries read left to right
-    anchors = ([(-0.17, 1.10), (-0.17, 1.055)] if bare else [(0.015, 0.885), (0.015, 0.855)])
+    anchors = ([(-0.17, 1.10), (-0.17, 1.055)] if bare else ([(0.015, 0.885), (0.015, 0.855)] if subtitle else [(0.015, 0.91), (0.015, 0.88)]))
     for line, anchor in zip((keys[:3], keys[3:]), anchors):
         kw = dict(bbox_transform=ax.transAxes) if bare else {}
         fig.legend([k for k, _ in line], [t for _, t in line], handler_map={Glyph: GlyphHandler()}, loc="lower left" if bare else "upper left",
                    bbox_to_anchor=anchor, ncol=len(line), frameon=False, fontsize=9, labelcolor=INK2, columnspacing=1.2,
                    handletextpad=0.2, handlelength=1.4, **kw)
-    fig.subplots_adjust(top=0.95 if bare else 0.80)
-    suffix = "_bare" if bare else ""
+    fig.subplots_adjust(top=0.95 if bare else 0.80 if subtitle else 0.81)
+    suffix = "_bare" if bare else "_subtitle" if subtitle else ""
     fig.savefig(f"{OUT}/fig4_release_timeline_0.3.0_only{suffix}.png", dpi=150, facecolor=SURFACE, bbox_inches="tight")
     plt.close(fig)
 
