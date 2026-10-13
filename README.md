@@ -57,7 +57,7 @@ In contrast to the task description the agent receives, runs are awarded either 
 
 Since 2025, models are mostly able to solve the task. (Smaller) Anthropic models seem to struggle more, to the extent the data allows an analysis:
 
-![](docs/figures/fig4_release_timeline_0.3.0_only.png)
+![](docs/figures/fig4_release_timeline_0.3.0_only_bare.png)
 
 ([Markdown version of graph](docs/figures/fig4_release_timeline_0.3.0_only.md))
 
