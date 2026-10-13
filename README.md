@@ -1,6 +1,6 @@
 # Bruteforce-digits AI evaluation
 
-This repo hosts an **evaluation task for AI agents**, originally submitted as a [METR Task](https://taskdev.metr.org/introduction/) in [2024-10](https://github.com/humnrdble/bruteforce-digits/tree/METR-2024-10) and now expanded with experimental results. The task is a fair trick-question that even some modern models fail.
+This repo hosts an **evaluation task for AI agents**, originally submitted as a [METR Task](https://taskdev.metr.org/introduction/) in [2024-10](https://github.com/humnrdble/bruteforce-digits/tree/METR-2024-10) and now expanded with experimental results. The task is a fair trick-question.
 
 Modern, larger models tend to successfully solve this task. The performance of smaller *or* older models varies and is dependent on the exact task formulation.
 
@@ -66,15 +66,21 @@ The 2024-10 task proposal was originally accepted by METR, but the final submiss
 
 ### Evaluation
 
-This is an informal/proof-of-concept evaluation (it may be expanded in the future). The methodology was not fixed in advance. Many AI models are only sampled once, making this evaluation unreliable.
+This is an informal/proof-of-concept evaluation (it may be expanded in the future). It was run in [AISI Inspect](https://inspect.aisi.org.uk/), using [METR task bridge](https://github.com/metr/inspect-metr-task-bridge/). The methodology was not fixed in advance. Many AI models are only sampled once, making this evaluation unreliable.
 
-In contrast to the task description the agent receives, runs are awarded either `1.0` points (success) or `0.0` points (failure). Speed and approaches are evaluated manually.
+In contrast to the task description the agent receives, runs are awarded either `1.0` points (success) or `0.0` points (failure). Speed and approaches are evaluated separately.
+
+Since 2025, models are mostly able to solve the task. (Smaller) Anthropic models seem to struggle more, to the extent the data allows an analysis:
 
 ![](docs/figures/fig4_release_timeline_0.3.0_only.png)
 
+([Markdown version of graph](docs/figures/fig4_release_timeline_0.3.0_only.md))
 
+Runs fail either because the model didn't solve the task within 10 minutes (⏱) or submitted the wrong answer (✗). Successful runs are classified by how fast the model found the correct solution (the classification is somewhat ad-hoc): If it spent less than 10 seconds in tool calls (✓), it found the solution almost immediately. More than 10 seconds (→) mean it likely spent some time bruteforcing the sha hash. At over 120 seconds (↷), the model spent a long time bruteforcing, but pivoted to the correct solution eventually.
 
-The default configuration of [METR Task Bridge](https://github.com/metr/inspect-metr-task-bridge/) makes agents waste precious time in tool calls. Modified tool descriptions and configuration were supplied in task version 0.3.0, via [solver.py](evals/solver.py).
+The default configuration of [METR Task Bridge](https://github.com/metr/inspect-metr-task-bridge/) makes agents waste precious time in tool calls. Modified tool descriptions and configuration were supplied in task version 0.3.0, via [solver.py](evals/solver.py). Only models that failed in the default configuration were reevaluated with version 0.3.0, reducing the evaluation's validity.
+
+A random submission in the correct format has a 1/16 chance of being correct. No such submissions were observed.
 
 For an AI-generated experiment log, see [eval-report-0.3.0.md](docs/eval-report-0.3.0.md).
 
