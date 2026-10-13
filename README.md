@@ -57,7 +57,7 @@ In contrast to the task description the agent receives, runs are awarded either 
 
 Since 2025, models are mostly able to solve the task. (Smaller) Anthropic models seem to struggle more, to the extent the data allows an analysis:
 
-![](docs/figures/fig4_release_timeline_0.3.0_only_bare.png)
+![](docs/figures/fig4_release_timeline_0.3.0_only.png)
 
 ([Markdown version of graph](docs/figures/fig4_release_timeline_0.3.0_only.md))
 
@@ -66,8 +66,32 @@ Runs fail either because the agent didn't solve the task within 10 minutes (⏱)
 For an AI-generated experiment log, see [eval-report-0.3.0.md](docs/eval-report-0.3.0.md).
 
 ### Limitations
-- The default configuration of [METR Task Bridge](https://github.com/metr/inspect-metr-task-bridge/) makes agents waste precious time in tool calls. Modified tool descriptions and configuration were supplied in task version 0.3.0, via [solver.py](evals/solver.py). Only models that failed in the default configuration were reevaluated with version 0.3.0, reducing the evaluation's validity.
+- The default configuration of [METR Task Bridge](https://github.com/metr/inspect-metr-task-bridge/) makes agents waste precious time in tool calls. Some runs were evaluated with this configuration and are marked as version 0.2.0. <br>
+Modified tool descriptions and configuration were supplied in task version 0.3.0, via [solver.py](evals/solver.py). Only models that failed in the default configuration were reevaluated with version 0.3.0, reducing the evaluation's validity.<br>
+The task version of a run is recorded in the .eval files in [evals/logs](evals/logs), viewable with [AISI Inspect](https://inspect.aisi.org.uk/).
+
 
 - A random submission in the correct format has a 1/16 chance of being correct. No such submissions were observed.
 
 - With the publication in 2026-10, this task can end up in the training data of future models.
+
+
+### Running an evaluation
+Requires Docker and the package manager `uv`. Docker must be running before starting an evaluation.
+
+In the top directory, rename `.env.example` to `.env`. Add an API key in `evals/.env`.
+
+```bash
+git submodule update --init
+MODEL=mockllm/model MESSAGE_LIMIT=50 evals/run.sh      # smoke test, no API key needed; scores 0.0
+MODEL=anthropic/<model> EPOCHS=3 evals/run.sh          # real run; supports various providers e.g., openrouter/<provider>/<model>
+uv --project third_party/inspect-metr-task-bridge run inspect view --log-dir evals/logs # view the evaluation results in Inspect
+```
+Optional environment variables:
+- `EPOCHS` defaults to 1. Number of repeated runs.
+- `WORKING_LIMIT` defaults to 600 s. A run ends after 600 s (10 minutes) by default.
+- `MESSAGE_LIMIT` defaults to 100000. Maximum number of model actions after which a run ends.
+- `MODEL_ARGS` optional arguments for OpenRouter.
+
+
+
