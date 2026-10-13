@@ -1,3 +1,5 @@
+\[This task was published deliberately. Original task template readme below.]
+
 # METR Task Template
 
 This is a template you can use to develop tasks for the [METR Task Standard](https://github.com/METR/task-standard/).
