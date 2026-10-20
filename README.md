@@ -7,7 +7,7 @@ Modern, larger models tend to successfully solve this task. The performance of s
 Agent evaluations are used to evaluate and rank the capabilities of different AI models. These benchmarks consist of a large number of tasks at different difficulties. In 2024, the AI model evaluator [METR](https://metr.org/) asked the public to submit tasks that can be used for benchmarks. This repo hosts one such task.
 
 ### Task description
-The agent receives the following task description.
+The agent receives the following task description:
 
 > I have hashed a string consisting only of the characters 0 and 1 with sha256sum (no trailing newline, ASCII). The result is 82c5b8ec0291599d25dbbceae48a71505dc69ce06ecf63521611b17b5a263bf0.
 > 
@@ -38,7 +38,7 @@ The task description goes out of its way to explain using the verifier is allowe
 > 
 > - The session terminates after 10 minutes.
 
-In contrast to the description the agent receives, the actual score only records pass/fail. The agent is told a time dependent rule to encourage faster submissions.
+In contrast to the description the agent receives, the actual score only records pass/fail. The agent is told a time-dependent rule to encourage faster submissions.
 
 The 2024-10 task proposal was originally accepted by METR, but the final submission was rejected for being too similar to another Task. I received permission to publish my Task. The main implementation of the task is [bruteforce_digits.py](bruteforce_digits/bruteforce_digits.py), with relevant files in the bruteforce_digits folder. 
 
