@@ -18,9 +18,17 @@ First sweep (default tools),haiku-5.5,anthropic,False,632.7,632.2,33.4,563.2,35.
 OpenAI runs (tool-timeout note),gpt-4.1,openai,True,10.7,10.4,5.2,2.9,2.3,2.3,21,submit,0,2026-10-10T10-03-24+00-00_bruteforce-digits_8uXK8hvjeK2Tu5AZwQtzEq.eval,gpt-4.1,2025-04-14
 OpenAI runs (tool-timeout note),gpt-6-sol,openai,True,10.9,10.6,7.4,1.0,2.2,0.6,10,submit,0,2026-10-10T09-57-59+00-00_bruteforce-digits_meGWHUAEy8CtJCYpMzc2Hq.eval,gpt-6-sol,2026-09-22
 OpenAI runs (tool-timeout note),gpt-6-luna,openai,True,33.0,32.5,29.7,0.7,2.2,0.4,10,submit,0,2026-10-10T09-58-23+00-00_bruteforce-digits_WciBdBNRe6pDu8he9uicMo.eval,gpt-6-luna,2026-09-22
+OpenAI runs (tool-timeout note),gpt-4-turbo,openai,True,36.6,36.3,33.7,0.7,1.9,0.4,10,submit,0,2026-10-20T20-17-36+00-00_bruteforce-digits_VwMRRG9UMGZYoSy7PYGjJf.eval,gpt-4-turbo #1,2024-04-09
+OpenAI runs (tool-timeout note),gpt-4-turbo,openai,True,70.7,70.4,63.1,5.3,1.9,4.8,38,submit,0,2026-10-20T17-34-57+00-00_bruteforce-digits_QWwnorE4YGw93D2D5tAGDG.eval,gpt-4-turbo #2,2024-04-09
 OpenAI runs (tool-timeout note),gpt-oss-120b,openai,True,72.4,71.7,19.4,49.7,2.6,46.6,12,submit,0,2026-10-10T10-03-48+00-00_bruteforce-digits_SDFnL9y5XNM8cL5JNXzvNb.eval,gpt-oss-120b,2025-08-05
+OpenAI runs (tool-timeout note),gpt-4-turbo,openai,False,86.4,86.1,81.6,2.6,1.9,,18,submit,0,2026-10-20T17-36-30+00-00_bruteforce-digits_h9T924fr3twVvBiJ2euUUJ.eval,gpt-4-turbo #3,2024-04-09
+OpenAI runs (tool-timeout note),gpt-4-turbo,openai,True,90.7,89.8,79.7,7.8,2.3,7.6,68,submit,0,2026-10-20T20-15-54+00-00_bruteforce-digits_Vpfc3RW5Rnj99xTuRA9DQj.eval,gpt-4-turbo #4,2024-04-09
+OpenAI runs (tool-timeout note),gpt-4-turbo,openai,False,98.3,97.9,93.8,2.2,1.9,,23,submit,0,2026-10-20T20-22-20+00-00_bruteforce-digits_n7aadCRXXXjguPo67ZbGF9.eval,gpt-4-turbo #5,2024-04-09
+OpenAI runs (tool-timeout note),gpt-4-turbo,openai,False,227.5,227.0,122.5,102.5,1.9,,28,submit,0,2026-10-20T20-18-23+00-00_bruteforce-digits_SxR5TCxv5RkNNsnHK6SLxx.eval,gpt-4-turbo #6,2024-04-09
 OpenAI runs (tool-timeout note),gpt-5.4-mini,openai,False,245.2,244.9,7.7,234.3,2.9,,10,submit,1,2026-10-10T09-59-07+00-00_bruteforce-digits_h8YcWoWEsREY2XRsmRS7en.eval,gpt-5.4-mini,2026-03-17
 OpenAI runs (tool-timeout note),gpt-4o-2024-11-20,openai,False,766.6,499.6,201.4,292.2,6.0,,382,submit,2,2026-10-11T06-00-32+00-00_bruteforce-digits_AnGPDFBQ78mhYwVUpCWsTB.eval,gpt-4o-2024-11-20,2024-11-20
+OpenAI runs (tool-timeout note),gpt-4,openai,False,527.0,525.9,44.9,468.5,12.4,,48,submit,2,2026-10-20T16-22-57+00-00_bruteforce-digits_9EWsycaUy6HTKcgVRdDTpt.eval,gpt-4 #1,2023-05-28
+OpenAI runs (tool-timeout note),gpt-4,openai,False,617.2,616.7,23.2,498.9,94.6,,20,working,4,2026-10-20T16-37-03+00-00_bruteforce-digits_Zy8ZoYWK5xbCuAjZ9Ven4H.eval,gpt-4 #2,2023-05-28
 Retry (tool-timeout note),haiku-4.5,anthropic,True,14.9,14.5,11.0,1.0,2.5,0.7,12,submit,0,2026-10-10T09-45-47+00-00_bruteforce-digits_bALsrNSYfSrPevZHGYXu6b.eval,haiku-4.5,2025-10-15
 Retry (tool-timeout note),haiku-5.5,anthropic,True,58.2,57.8,9.2,46.5,2.2,46.0,11,submit,0,2026-10-10T09-46-14+00-00_bruteforce-digits_QbwUSwxdotUVqtwG2KcShX.eval,haiku-5.5,2026-10-07
 Retry (tool-timeout note),opus-4.8,anthropic,False,615.6,614.8,90.1,482.7,42.1,,62,working,1,2026-10-10T09-47-24+00-00_bruteforce-digits_iHaEUzc5Sd2eUSkYrgWAFr.eval,opus-4.8,2026-05-27

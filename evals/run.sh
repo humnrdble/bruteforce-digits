@@ -4,6 +4,7 @@
 # Usage: MODEL=anthropic/<model> [EPOCHS=3] [MODEL_ARGS='provider={"max_price":{"prompt":50,"completion":50}}'] evals/run.sh
 # API keys (e.g. ANTHROPIC_API_KEY) can be put in evals/.env, see evals/.env.example.
 #
+# MAX_TOOL_OUTPUT (bytes, optional) is passed as --max-tool-output; inspect's default is 16 KiB.
 # MODEL_ARGS is passed to inspect as -M. With openrouter/ models, `provider={"max_price":{...}}` caps the
 # price per million tokens (USD): OpenRouter only routes to providers at or below both ceilings, and the request
 # fails with a 404 ("No endpoints found that satisfy the max price") if none qualifies, instead of falling
@@ -43,6 +44,7 @@ uv --project "$BRIDGE" run inspect eval mtb/bridge \
     --solver evals/solver.py@agent \
     --tags tool-timeout-note \
     ${MODEL_ARGS:+-M "$MODEL_ARGS"} \
+    ${MAX_TOOL_OUTPUT:+--max-tool-output "$MAX_TOOL_OUTPUT"} \
     --epochs "$EPOCHS" \
     --message-limit "${MESSAGE_LIMIT:-100000}" \
     --working-limit "${WORKING_LIMIT:-600}" \

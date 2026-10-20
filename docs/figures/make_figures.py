@@ -34,6 +34,7 @@ CREATED = {
     "sonnet-5.5": 1790618686, "haiku-4.5": 1760547638, "haiku-5.5": 1791397883,
     "gpt-4o-2024-11-20": 1732127594, "gpt-4.1": 1744651385, "gpt-oss-120b": 1754414231,
     "gpt-5.4-mini": 1773748178, "gpt-6-sol": 1790100775, "gpt-6-luna": 1790100786,
+    "gpt-4": 1685232000, "gpt-4-turbo": 1712620800,  # read 2026-10-20
 }
 COMPANY = {"anthropic": "Anthropic", "openai": "OpenAI"}
 VIOLET, AQUA = "#4a3aa7", "#1baf7a"  # categorical slots 7 and 3, validated as a pair (all-pairs)
@@ -72,6 +73,8 @@ def collect() -> pd.DataFrame:
         if not log.samples:
             continue
         smp = log.samples[0]
+        if smp.error:  # e.g. the aborted gpt-4 batch (OpenRouter 402): no score, not a run
+            continue
         gen = tool = 0.0
         timeouts = 0
         to_answer = None  # tool seconds spent before the checker first replied "correct answer"
@@ -162,7 +165,7 @@ def fig_timeline(df: pd.DataFrame):
     axes[-1].set_xticks(range(0, 801, 100))
     fig.suptitle("Where each run's working time went", x=0.02, y=0.985, ha="left", fontsize=14, fontweight="semibold", color=INK)
     fig.text(0.02, 0.945, f"Working time per run (the limit applies to this), split into model generation, tool calls and other overhead. "
-             f"One sample per model; {len(df)} runs.", color=INK2, fontsize=9.5, ha="left")
+             f"One sample per run; {len(df)} runs.", color=INK2, fontsize=9.5, ha="left")
     handles = [plt.Rectangle((0, 0), 1, 1, color=c) for c in (GEN, TOOL, OTHER)]
     leg = fig.legend(handles, ["Model generation", "Tool calls", "Other overhead"], loc="upper right",
                      bbox_to_anchor=(0.985, 0.985), ncol=3, frameon=False, fontsize=9.5, labelcolor=INK2)
@@ -194,13 +197,14 @@ def fig_scatter(df: pd.DataFrame):
         ax.annotate(text, (r.generation_s, max(r.tool_s, 0.3)), xytext=off, textcoords="offset points",
                     color=INK2, fontsize=8.5, va="center", ha=ha,
                     arrowprops=dict(arrowstyle="-", color=MUTED, linewidth=1, shrinkA=2, shrinkB=6))
-    tag(OPENAI, "gpt-5.4-mini", "gpt-5.4-mini: fewest tool seconds of any failure", (14, -48))
+    cheap = bad[bad.model == "gpt-4-turbo"].sort_values("tool_s").iloc[0]
+    tag(OPENAI, cheap.label, f"gpt-4-turbo: failures with about {cheap.tool_s:.0f} s in tools", (14, 40))
     tag(OPENAI, "gpt-4o-2024-11-20", "gpt-4o: longest generation time", (-10, -75), ha="center")
     tag(RETRY, "sonnet-5", "sonnet-5 (retry): solved after 496 s in tools", (40, 45), ha="center")
     lo = int(bad.tool_s.min())
     n_slow_ok = int((ok.tool_s > 250).sum())
     n_gen_hi = int((df.generation_s > 110).sum())
-    fig.suptitle(f"Every failed run spent {lo} s or more in tool calls", x=0.02, y=0.99, ha="left", fontsize=14,
+    fig.suptitle(f"Failed runs spent between {lo} s and {int(bad.tool_s.max())} s in tool calls", x=0.02, y=0.99, ha="left", fontsize=14,
                  fontweight="semibold", color=INK)
     fig.text(0.02, 0.935, f"{n_slow_ok} runs that solved the task also spent over 250 s in tools. "
              f"Generation time was under 110 s in {len(df) - n_gen_hi} of {len(df)} runs.", color=INK2, fontsize=9.5, ha="left")
@@ -229,11 +233,11 @@ def fig_outcomes(df: pd.DataFrame):
     ax.set_yticks(range(len(groups)))
     ax.set_yticklabels(groups, color=INK, fontsize=9.5)
     ax.invert_yaxis()
-    ax.set_xlim(0, 19)
+    ax.set_xlim(0, 20)
     ax.set_xticks([0, 5, 10, 15])
     ax.set_xlabel("Runs", color=INK2, fontsize=9.5)
-    fig.suptitle("Most runs solved the task in every setup", x=0.02, y=1.02, ha="left", fontsize=14, fontweight="semibold", color=INK)
-    fig.text(0.02, 0.93, "One epoch per model. The groups use different models and tools, so they are not a like-for-like comparison.",
+    fig.suptitle(f"{int(df.solved.sum())} of {len(df)} runs solved the task", x=0.02, y=1.02, ha="left", fontsize=14, fontweight="semibold", color=INK)
+    fig.text(0.02, 0.93, "Mostly one run per model (gpt-4 and gpt-4-turbo have several). The groups use different models and tools, so they are not a like-for-like comparison.",
              color=INK2, fontsize=9.5, ha="left")
     fig.subplots_adjust(top=0.82)
     fig.savefig(f"{OUT}/fig3_outcomes_by_group.png", dpi=150, facecolor=SURFACE, bbox_inches="tight")
@@ -247,6 +251,7 @@ def fig_release_timeline(df: pd.DataFrame):
     df = df.copy()
     df["pub"] = pd.to_datetime(df["published"])
     lanes = [("Solved", True), ("Failed", False)]
+    both = sorted(set(df[df.solved].model) & set(df[~df.solved].model))
     nrows = [df[df.solved == v].model.nunique() for _, v in lanes]
     fig, axes = plt.subplots(2, 1, figsize=(11, 0.33 * sum(nrows) + 3.0), sharex=True,
                              gridspec_kw=dict(height_ratios=nrows, hspace=0.32), facecolor=SURFACE)
@@ -271,14 +276,14 @@ def fig_release_timeline(df: pd.DataFrame):
         ax.set_ylim(len(order) - 0.4, -0.7)
         ax.set_title(f"{name}: {len(d)} runs, {len(order)} models (oldest model at the top)", loc="left", color=INK,
                      fontsize=10.5, fontweight="semibold", pad=6)
-    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 4, 7, 10]))
+    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 7]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
-    ax.set_xlim(pd.Timestamp("2024-10-01"), pd.Timestamp("2026-11-15"))
+    ax.set_xlim(pd.Timestamp("2023-04-01"), pd.Timestamp("2026-11-15"))
     ax.set_xlabel("Model published on OpenRouter", color=INK2, fontsize=9.5)
     fig.suptitle("Release date does not separate solved from failed runs", x=0.02, y=0.985, ha="left", fontsize=14,
                  fontweight="semibold", color=INK)
     fig.text(0.02, 0.945, "One dot per run, placed at the model's publication date. Repeated runs of a model sit side by side. "
-             "The newest model, haiku-5.5, appears in both lanes.", color=INK2, fontsize=9.5, ha="left")
+             f"Models with solved and failed runs appear in both lanes ({', '.join(both)}).", color=INK2, fontsize=9.5, ha="left")
     h = [plt.Line2D([], [], marker=marker[k], color=SURFACE, markerfacecolor=color[k], markersize=9, linestyle="")
          for k in ("anthropic", "openai")]
     fig.legend(h, ["Anthropic", "OpenAI"], loc="upper right", bbox_to_anchor=(0.985, 0.99), ncol=2, frameon=False,
@@ -320,19 +325,31 @@ class GlyphHandler(HandlerBase):
         return [a]
 
 
+ROUTE_ORDER = ["✓", "→", "↷", "⏱", "✗"]
+
+
+def route_counts(d: pd.DataFrame) -> list:
+    """(mark, number of runs that took it) for one model's runs, in the order of the route key."""
+    c = d.route.value_counts()
+    return [(m, int(c[m])) for m in ROUTE_ORDER if m in c.index]
+
+
 def route_markdown(runs: pd.DataFrame, order: list, n_runs: int) -> str:
     """Table version of figure 4b: one row per model, in the same order as the figure."""
     what = {"✓": "checker first", "→": "brute-force detour, then checker", "↷": "late pivot to the checker",
             "⏱": "failed: working limit hit", "✗": "failed: wrong answer submitted"}
     lines = ["# Route to the answer, one row per model (0.3.0 runs)", "",
              f"Generated by `make_figures.py`; the figure is `fig4_release_timeline_0.3.0_only.png`. {n_runs} runs, {len(order)} models, "
-             "oldest model first. Models rerun on 0.3.0 use only their 0.3.0 runs.", "",
-             "| Model | Provider | Published | Route |  | Runs |",
+             "oldest model first. Models rerun on 0.3.0 use only their 0.3.0 runs. The number after a mark is how many of the "
+             "model's runs took that route; Runs is solved/total.", "",
+             "| Model | Provider | Published | Route (runs) |  | Runs |",
              "|---|---|---|---|---|---|"]
     for m in order:
         d = runs[runs.model == m]
         r = d.iloc[0]
-        lines.append(f"| {m} | {r.provider} | {r.published} | {r.route} | {what[r.route]} | {len(d)} |")
+        rc = route_counts(d)
+        lines.append(f"| {m} | {r.provider} | {r.published} | {' '.join(f'{k} {n}' for k, n in rc)} | "
+                     f"{'; '.join(what[k] for k, _ in rc)} | {int(d.solved.sum())}/{len(d)} |")
     lines += ["", "| Mark | Meaning | Rule |", "|---|---|---|",
               f'| ✓ | checker first | the checker said "correct answer" after {DIRECT_MAX_S} s or less of tool time |',
               f"| → | brute-force detour, then checker | after more than {DIRECT_MAX_S} s and up to {DETOUR_MAX_S} s |",
@@ -349,21 +366,19 @@ def fig_release_timeline_combined(df: pd.DataFrame, bare: bool = False, subtitle
     bare=True leaves out the title; the solved/failed/provider key stays on top and the route key follows it. Both layouts show the route key in two lines above the axes.
     The normal version also writes the Markdown table."""
     import matplotlib.dates as mdates
+    from matplotlib.transforms import ScaledTranslation
     FAIL_BG = "#f8e3e1"  # light tint of CRIT
 
     rerun = set(df[df.group != FIRST].model)
     df = df[(df.group != FIRST) | ~df.model.isin(rerun)].copy()
     df["pub"] = pd.to_datetime(df["published"])
-    mixed = df.groupby("model").solved.nunique()
-    if (mixed > 1).any():
-        raise ValueError(f"models with differing results across runs: {sorted(mixed[mixed > 1].index)}")
     df["route"] = df.apply(route, axis=1)
-    mixed_route = df.groupby("model").route.nunique()
-    if (mixed_route > 1).any():
-        raise ValueError(f"models with differing routes across runs: {sorted(mixed_route[mixed_route > 1].index)}")
     n_runs = len(df)
     runs = df
+    n_ok = runs.groupby("model").solved.sum()
+    n_all = runs.groupby("model").solved.size()
     df = df.drop_duplicates("model")
+    df["status"] = df.model.map(lambda m: "solved" if n_ok[m] == n_all[m] else "failed" if n_ok[m] == 0 else "mixed")
     order = df.groupby("model").pub.first().sort_values(kind="stable").index.tolist()
     if not bare:
         with open(f"{OUT}/fig4_release_timeline_0.3.0_only.md", "w") as fh:
@@ -371,45 +386,63 @@ def fig_release_timeline_combined(df: pd.DataFrame, bare: bool = False, subtitle
     fig, ax = plt.subplots(figsize=(11, 0.3 * len(order) + (1.6 if bare else 2.8 if subtitle else 2.5)), facecolor=SURFACE)
     style(ax)
     marker = {"anthropic": "o", "openai": "D"}
+    SLOT, GAP = 34, 14  # width of one route item and space between the items and the axes (points)
+    counts = {m: route_counts(runs[runs.model == m]) for m in order}
+    n_slots = max(len(c) for c in counts.values())
+    fig.subplots_adjust(top=0.95 if bare else 0.80 if subtitle else 0.81)
+    shade_x = (GAP + SLOT * n_slots + 4) / (ax.get_position().width * fig.get_figwidth() * 72)  # shading starts left of the route column
     for i, m in enumerate(order):
         r = df[df.model == m].iloc[0]
-        if r.solved:
+        if r.status == "solved":
             ax.scatter([r.pub], [i], s=85, color=GOOD, marker=marker[r.provider], edgecolor=SURFACE, linewidth=2, zorder=3)
-        else:  # tinted row plus a hollow red marker, so failures differ in fill as well as hue
-            ax.axhspan(i - 0.5, i + 0.5, xmin=-0.04, xmax=1, clip_on=False, color=FAIL_BG, linewidth=0, zorder=1)
-            ax.scatter([r.pub], [i], s=85, facecolor=FAIL_BG, marker=marker[r.provider], edgecolor=CRIT, linewidth=2.4, zorder=3)
-    # route column next to the model names (x in axes fraction, y in data units)
-    col = -0.022
-    ax.tick_params(axis="y", pad=26)
-    ax.text(col, -1.15, "Route", transform=ax.get_yaxis_transform(), color=INK, fontsize=9, fontweight="semibold",
-            ha="center", va="center", clip_on=False)
+            continue
+        # tinted row if any run failed; hollow red marker if all failed, green marker with a red rim if only some did
+        ax.axhspan(i - 0.5, i + 0.5, xmin=-shade_x, xmax=1, clip_on=False, color=FAIL_BG, linewidth=0, zorder=1)
+        ax.scatter([r.pub], [i], s=85, facecolor=GOOD if r.status == "mixed" else FAIL_BG, marker=marker[r.provider],
+                   edgecolor=CRIT, linewidth=2.4, zorder=3)
     for i, m in enumerate(order):
-        mark = df[df.model == m].route.iloc[0]
-        color = {"✓": GOOD, "→": INK2, "↷": INK2}.get(mark, CRIT)
-        if mark == "⏱":
-            ax.scatter([col], [i], s=95, marker=CLOCK, facecolor="none", edgecolor=color, linewidth=1.6,
-                       transform=ax.get_yaxis_transform(), clip_on=False, zorder=4)
-        else:
-            ax.text(col, i, mark, transform=ax.get_yaxis_transform(), color=color, fontsize=13, fontweight="bold",
-                    ha="center", va="center", clip_on=False)
+        r = df[df.model == m].iloc[0]
+        ax.annotate(f"{int(n_ok[m])}/{int(n_all[m])}", (r.pub, i), xytext=(-11, 0), textcoords="offset points",
+                    ha="right", va="center", color=INK2, fontsize=8.5, zorder=4)  # solved/total runs, left of the dot
+    # route column next to the model names: one "mark count" item per route taken, in points left of the axes
+    ax.tick_params(axis="y", pad=GAP + SLOT * n_slots + 8)
+    ax.text(0, -1.15, "Route", transform=ax.get_yaxis_transform() + ScaledTranslation(
+            -(GAP + SLOT * n_slots / 2) / 72, 0, fig.dpi_scale_trans), color=INK, fontsize=9,
+            fontweight="semibold", ha="center", va="center", clip_on=False)
+    for i, m in enumerate(order):
+        for k, (mark, n) in enumerate(counts[m]):
+            color = {"✓": GOOD, "→": INK2, "↷": INK2}.get(mark, CRIT)
+            x0 = -(GAP + SLOT * n_slots - SLOT * k) / 72  # inches left of the axes
+            tr = ax.get_yaxis_transform() + ScaledTranslation(x0, 0, fig.dpi_scale_trans)
+            tr_n = ax.get_yaxis_transform() + ScaledTranslation(x0 + 13 / 72, 0, fig.dpi_scale_trans)
+            if mark == "⏱":
+                ax.scatter([0], [i], s=95, marker=CLOCK, facecolor="none", edgecolor=color, linewidth=1.6,
+                           transform=ax.get_yaxis_transform() + ScaledTranslation(x0 + 5 / 72, 0, fig.dpi_scale_trans),
+                           clip_on=False, zorder=4)
+            else:
+                ax.text(0, i, mark, transform=tr, color=color, fontsize=13, fontweight="bold",
+                        ha="left", va="center", clip_on=False)
+            ax.text(0, i, f"{n}", transform=tr_n, color=INK2, fontsize=9, ha="left", va="center", clip_on=False)
     ax.set_yticks(range(len(order)))
     ax.set_yticklabels(order, color=INK, fontsize=9.5)
     ax.invert_yaxis()
     ax.set_ylim(len(order) - 0.4, -0.7)
-    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 4, 7, 10]))
+    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 7]))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
-    ax.set_xlim(pd.Timestamp("2024-10-01"), pd.Timestamp("2026-11-15"))
+    ax.set_xlim(pd.Timestamp("2023-01-01"), pd.Timestamp("2026-11-15"))
     ax.set_xlabel("Model published on OpenRouter (oldest model at the top)", color=INK2, fontsize=9.5)
     subtitle = subtitle and not bare
     if not bare:
         fig.suptitle("Results and route to the answer, by model release date", x=0.02, y=0.99, ha="left", fontsize=14,
                      fontweight="semibold", color=INK)
         if subtitle:
-            fig.text(0.02, 0.945, f"One dot per model, placed at its publication date; {int(df.solved.sum())} solved, "
-                     f"{int((~df.solved).sum())} failed ({n_runs} runs; failed rows shaded). Models rerun on 0.3.0 use only their 0.3.0 runs.",
+            fig.text(0.02, 0.945, f"One dot per model, placed at its publication date; {int((df.status == 'solved').sum())} solved, "
+                     f"{int((df.status == 'mixed').sum())} mixed, {int((df.status == 'failed').sum())} failed ({n_runs} runs; rows with a failed run shaded). Models rerun on 0.3.0 use only their 0.3.0 runs.",
                      color=INK2, fontsize=9.5, ha="left")
     h = [plt.Line2D([], [], marker="o", color=SURFACE, markerfacecolor=GOOD, markersize=9, linestyle=""),
          plt.Line2D([], [], marker="o", color=SURFACE, markerfacecolor=FAIL_BG, markeredgecolor=CRIT, markeredgewidth=2.4,
+                    markersize=9, linestyle=""),
+         plt.Line2D([], [], marker="o", color=SURFACE, markerfacecolor=GOOD, markeredgecolor=CRIT, markeredgewidth=2.4,
                     markersize=9, linestyle=""),
          plt.Line2D([], [], marker="o", color=SURFACE, markerfacecolor=MUTED, markersize=9, linestyle=""),
          plt.Line2D([], [], marker="D", color=SURFACE, markerfacecolor=MUTED, markersize=9, linestyle="")]
@@ -420,7 +453,7 @@ def fig_release_timeline_combined(df: pd.DataFrame, bare: bool = False, subtitle
     # bare: the solved/failed/provider key sits directly above the Route header
     where1 = (dict(bbox_to_anchor=(-0.17, 1.15), bbox_transform=ax.transAxes, loc="lower left") if bare
               else dict(bbox_to_anchor=(0.015, 0.925 if subtitle else 0.95), loc="upper left"))
-    fig.legend(h, ["Solved", "Failed", "Anthropic (circle)", "OpenAI (diamond)"], ncol=4, frameon=False,
+    fig.legend(h, ["Solved", "Failed", "Some runs failed", "Anthropic (circle)", "OpenAI (diamond)"], ncol=5, frameon=False,
                fontsize=9.5, labelcolor=INK2, **where1)
     # route key in two lines above the axes in both layouts (in the bare figure it sits between the solved/failed key and the Route header),
     # each line a separate one-row legend so the entries read left to right
